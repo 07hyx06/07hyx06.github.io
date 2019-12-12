@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>zb.md</title>
+<title>1003 Emergency (25分).md</title>
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
 
 <style>
@@ -421,8 +421,108 @@ void 0!==arguments[0]&&(br.sequenceConfig=arguments[0]),e=arguments[1]):e=argume
           : 'default'
     });
   </script>
-<h1 id="%E8%B5%B5%E5%8D%9A%E6%98%AF%E5%82%BB%E5%B1%8C">赵博是傻屌</h1>
-<p><code>zbzbzbsb？ Yes！</code></p>
+<h1 id="1003-emergency-25%E5%88%86">1003 Emergency (25分)</h1>
+<h2 id="%E9%A2%98%E6%84%8F%EF%BC%9A">题意：</h2>
+<p>一个国家有<code>N</code>个城市，每个城市都有一定数量的救援队，地图共有<code>M</code>条边。如果城市<code>c2</code>着火，那么从城市<code>c1</code>赶到<code>c2</code>的最短路径有几条？所有最短路径中，能集结的最多救援队数量是多少？<br></p>
+<h2 id="%E9%A2%98%E8%A7%A3%EF%BC%9A">题解：</h2>
+<p>既然是求最短路，肯定是要打一个迪杰斯特拉的板子了。在更新最短路径长度的同时，更新最短路径条数与集结的救援队数量即可。看一眼题目的数据量发现地图很小，<code>N&lt;=500</code>，那么用邻接矩阵存图就好了。<br>
+首先开一个结构体数组维护<code>最短路径长度，最短路径条数与集结的救援队数量</code>：</p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">path</span>{</span>
+	<span class="hljs-keyword">int</span> l,np,nr;<span class="hljs-comment">//最短路径长度，最短路径条数，最多可集合的救援队数</span>
+}p[maxn];
+</div></code></pre>
+<p>各个数组含义如下：</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">int</span> num[maxn];<span class="hljs-comment">//每个城市的救援队数量 </span>
+<span class="hljs-keyword">int</span> mp[maxn][maxn];<span class="hljs-comment">//地图 </span>
+<span class="hljs-keyword">int</span> vis[maxn];<span class="hljs-comment">//记录节点是否被访问过</span>
+</div></code></pre>
+<p>下面是关键之处，即维护<code>最短路径长度，最短路径条数与集结的救援队数量</code>的过程，分为两种情况讨论：<br></p>
+<ol>
+<li>如果发现有一条到<code>i点</code>更短的路径，那么应当更新最短路长度为<code>p[i].l=mp[idx][i]+minl</code>，此时的最短路径数量应当与源点到<code>idx点</code>的数量相同，因此更新为：<code>p[i].np=p[idx].np</code>，最后更新救援队数量：<code>p[i].nr=p[idx].nr+num[i]</code>。</li>
+<li>如果发现经过<code>idx点</code>到<code>i点</code>的路径长度与之前的最短路径相同，需要增加最短路径数量<code>p[i].np+=p[idx].np</code>，维护救援队数量<code>p[i].nr=max(p[i].nr,p[idx].nr+num[i])</code>，<strong>注意这里是取<code>max</code></strong>。</li>
+</ol>
+<h2 id="ac%E4%BB%A3%E7%A0%81%EF%BC%9A">AC代码：</h2>
+<pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;bits/stdc++.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> maxn 510</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> inf 9999999</span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> <span class="hljs-built_in">std</span>;
+<span class="hljs-keyword">int</span> n,m,c1,c2;
+<span class="hljs-keyword">int</span> num[maxn];<span class="hljs-comment">//每个城市的救援队数量 </span>
+<span class="hljs-keyword">int</span> mp[maxn][maxn];<span class="hljs-comment">//地图 </span>
+<span class="hljs-keyword">int</span> vis[maxn];<span class="hljs-comment">//记录节点是否被访问过 </span>
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">path</span>{</span>
+	<span class="hljs-keyword">int</span> l,np,nr;<span class="hljs-comment">//最短路径长度，最短路径条数，最多可集合的救援队数 </span>
+}p[maxn];
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">init</span><span class="hljs-params">()</span>
+</span>{
+	<span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i=<span class="hljs-number">0</span>;i&lt;n;i++)
+	{
+		<span class="hljs-keyword">if</span>(mp[c1][i]) 
+		{
+			p[i].l=mp[c1][i];
+			p[i].np=<span class="hljs-number">1</span>;
+		}
+		<span class="hljs-keyword">else</span> 
+		{
+			p[i].l=inf;
+			p[i].np=<span class="hljs-number">0</span>;
+		}
+	}
+	p[c1].l=<span class="hljs-number">0</span>;
+	p[c1].np=<span class="hljs-number">1</span>;
+	p[c1].nr=num[c1];
+	vis[c1]=<span class="hljs-number">1</span>;
+}
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">dijkstra</span><span class="hljs-params">()</span>
+</span>{
+	init();
+	<span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>)
+	{
+		<span class="hljs-keyword">int</span> idx=<span class="hljs-number">-1</span>,minl=inf;
+		<span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i=<span class="hljs-number">0</span>;i&lt;n;i++)<span class="hljs-comment">//找最小边 </span>
+		{
+			<span class="hljs-keyword">if</span>(vis[i]==<span class="hljs-number">0</span>&amp;&amp;p[i].l&lt;minl)
+			{
+				minl=p[i].l;
+				idx=i;
+			}
+		}
+		<span class="hljs-keyword">if</span>(idx==<span class="hljs-number">-1</span>) <span class="hljs-keyword">break</span>;
+		vis[idx]=<span class="hljs-number">1</span>;
+		p[idx].nr=max(p[idx].nr,p[c1].nr+num[idx]); 
+		<span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i=<span class="hljs-number">0</span>;i&lt;n;i++)<span class="hljs-comment">//更新最短距离 </span>
+		{
+			<span class="hljs-keyword">if</span>(mp[idx][i])
+			{
+				<span class="hljs-keyword">if</span>(p[i].l&gt;mp[idx][i]+minl)<span class="hljs-comment">//发现更短的路径 </span>
+				{
+					p[i].l=mp[idx][i]+minl;
+					p[i].np=p[idx].np;<span class="hljs-comment">//覆盖最短路条数 </span>
+					p[i].nr=p[idx].nr+num[i];<span class="hljs-comment">//更新救援队数量 </span>
+				}
+				<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(p[i].l==mp[idx][i]+minl)<span class="hljs-comment">//最短路长度不变 </span>
+				{
+					p[i].np+=p[idx].np;<span class="hljs-comment">//增加最短路条数 </span>
+					p[i].nr=max(p[i].nr,p[idx].nr+num[i]); 
+				}
+			}
+		}
+	}
+}
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>
+</span>{
+	<span class="hljs-built_in">scanf</span>(<span class="hljs-string">"%d%d%d%d"</span>,&amp;n,&amp;m,&amp;c1,&amp;c2);
+	<span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i=<span class="hljs-number">0</span>;i&lt;n;i++) <span class="hljs-built_in">scanf</span>(<span class="hljs-string">"%d"</span>,&amp;num[i]);<span class="hljs-comment">//每个城市救援队数量</span>
+	<span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i=<span class="hljs-number">0</span>;i&lt;m;i++) 
+	{
+		<span class="hljs-keyword">int</span> tx,ty,tw;
+		<span class="hljs-built_in">scanf</span>(<span class="hljs-string">"%d%d%d"</span>,&amp;tx,&amp;ty,&amp;tw);
+		mp[tx][ty]=mp[ty][tx]=tw;
+	}
+	dijkstra();
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"%d %d"</span>,p[c2].np,p[c2].nr);
+}
+</div></code></pre>
 
 </body>
 </html>
