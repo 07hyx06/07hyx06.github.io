@@ -19,26 +19,56 @@
 	</nav>
 	<br>
     <div class="container">
-        <div class="card-body">
-            <h1>Computer Vision</h1>
+        <div class="card">
+            <div class="card-head">
+                <h1>计算机视觉笔记</h1>
+            </div>
+            <div class="card-body">
+                <p>
+                    这里包含计算机视觉各方向的经典论文的原创笔记以及一些源代码分析与复现关键步骤。讨论请联系1025723614@qq.com :)
+                    <ul>
+                        <li>基础知识与Pytorch源码：Pytorch是目前最火的python优先深度学习库，其代码简洁优雅。
+                            这部分包含一些源代码分析与深度学习基础概念的解释，包括损失函数，优化器，初始化，IOU等概念。</li>
+                        <li>生成对抗模型：生成符合以有数据分布的新数据。例如：生成假的人像，将马变成斑马，生成二次元风格自拍照等。</li>
+                        <li>图像分类模型：顾名思义，用于图像分类。分类模型同时还具有提取图片深层次语义信息的强大功能，是一切任务的基础。</li>
+                        <li>目标检测模型：检测一张数字图片中出现物体的位置与类别信息。</li>
+                    </ul>
+                </p>
+            </div>
         </div>
         <div id="accordion">
             <div class="card">
                 <div class="card-header">
-                    <a class="card-link" data-toggle="collapse" href="#collapse1">生成对抗模型</a>
+                    <a class="card-link" data-toggle="collapse" href="#collapse1">基础知识与Pytorch源码</a>
                 </div>
                 <div id="collapse1" class="collapse" data-parent="#accordion">
+                    <ul class="list-group">
+                        <li class="list-group-item"><a href="cv_blog/0002_交叉熵.html">交叉熵</a></li>
+                    </ul>
+                </div>
+                <div class="card-header">
+                    <a class="card-link" data-toggle="collapse" href="#collapse2">生成对抗模型</a>
+                </div>
+                <div id="collapse2" class="collapse" data-parent="#accordion">
                     <ul class="list-group">
                         <li class="list-group-item"><a href="cv_blog/0001_GAN.html">GAN：最初的生成对抗模型</a></li>
                         <li class="list-group-item"><a href="#">CycleGAN：加入循环一致性的GAN</a></li>
                     </ul>
                 </div>
                 <div class="card-header">
-                    <a class="card-link" data-toggle="collapse" href="#collapse2">图像分类模型</a>
+                    <a class="card-link" data-toggle="collapse" href="#collapse3">图像分类模型</a>
                 </div>
-                <div id="collapse2" class="collapse" data-parent="#accordion">
+                <div id="collapse3" class="collapse" data-parent="#accordion">
                     <ul class="list-group">
                         <li class="list-group-item"><a href="#">VGG</a></li>
+                    </ul>
+                </div>
+                <div class="card-header">
+                    <a class="card-link" data-toggle="collapse" href="#collapse4">目标检测模型</a>
+                </div>
+                <div id="collapse4" class="collapse" data-parent="#accordion">
+                    <ul class="list-group">
+                        <li class="list-group-item"><a href="#">SSD</a></li>
                     </ul>
                 </div>
             </div>

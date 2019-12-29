@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">交叉熵</h1>
+            <p class="lead blog-description">PytorchAPI</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <h2>交叉熵与最大似然估计</h2>
+                <p>
+                    先来看看什么是交叉熵损失函数。考虑在一个含有C个类别的图像分类数据集上面训练神经网络，使用常规的batch SGD训练，
+                    记一次迭代（iter）后神经网络的输出向量为x，则x的维度为\((batchsize,C\))，x[i]的维度为（C），代表第i张图片分别属于各类的置信度分；
+                    真实的训练标签label向量可以表示为\([c_0,c_1,...,c_{batchsize-1}]\)，其中\(c_i\)为[0,C-1]范围的整数，代表第i张图片的真实类别。<br><br>
+                    我们希望神经网络的输出向量能够代表图片属于各类别的概率，但此时的x显然有正有负，所以需要先进行一步<b>softmax</b>操作，
+                    使x[i]的各个分量都变成正的（其实就相当于做了一次指数归一化）：
+                    <p class="text-center">\(x[i]\leftarrow\frac{exp(x[i])}{\sum\limits_jexp(x[i][j])}\)</p>
+                    经过softmax后，交叉熵损失可以表示为如下公式，其中第二个等号用到了python的特性：
+                    <p class="text-center">\(loss(x,label)=-\sum\limits_{i} {\log{x[i][label[i]]}}=-\log{x[label]}\)</p>
+                    上面的定义可能有点懵，下面我再详细解释一下。我们现在来看看\(\log{x[i][label[i]]}\)到底是个什么东西。
+                    一层一层拆开来看，首先是\(label[i]\)，这个显然是第i张图片的真实标签。那么\(x[i][label[i]]\)又是什么？
+                    x[i]是一个长度为C的向量，x[i][j]代表神经网络认为将第i张图片属于第j类的概率，再进一步，
+                    \(x[i][label[i]]\)就是<b>神经网络将第i张图片分类正确的概率了</b>。此时还是不明白\(\log{x[i][label[i]]}\)究竟是什么。<br><br>
+                    现在换一种方式，记\(P_i=x[i][label[i]]\)，那么根据上面的讨论，\(P_i\)代表\(x_i\)这张图片分类正确的概率。
+                    \(\prod\limits_{i}{P_i}\)就代表了神经网络将一个批次上的所有batchsize张图片全部分类正确的概率，
+                    而我们训练神经网络的目的就是为了使这个式子的结果接近1！<br><br>
+                    回想一下<b>极大似然估计</b>在做什么事情：求出一组参数\(\theta\)使得似然函数最大。现在神经网络的训练就是在做这件事，
+                    只不过有一点不同的是，神经网络使用迭代法（如SGD，Adam）求解似然函数极值，而概率论课本中通常直接求导得极值点。
+                    构造似然函数为\(\log{\prod\limits_{i}{P_i}}\)，再将\(P_i\)代入，最后得到了上面的公式：
+                    <p class="text-center">\(\sum\limits_{i} {\log{x[i][label[i]]}}\)</p>
+                    至于为什么少了个负号，这是由于神经网络训练中规定寻找最小值。因此最后对似然函数取负号后就得到了交叉熵损失函数。
+                </p>
+                <h2>Pytorch API</h2>
+                <p>
+                    <img src='raw/0002_1.png' class="text-center" width="600">
+                    <ul>
+                        <li>weight：optional参数。可以实现对类别加权，在样本不平衡时可以采用。</li>
+                        <li>reduction：默认为mean，即对交叉熵取均值；可以选用sum，为直接求和不取平均。</li>
+                    </ul>
+                </p>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                    <li><a href="https://pytorch.org/docs/stable/nn.html#torch.nn.CrossEntropyLoss">Pytorch交叉熵文档</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+    </div>
+</body>
+</html>
