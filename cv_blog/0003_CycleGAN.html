@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Network</h1>
+            <p class="lead blog-description">GAN+循环一致性=CycleGAN</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <h2>Abstract</h2>
+                <p>
+                    图像翻译（image-to-image translation）是CV领域内的一类任务。图像翻译任务需要找出来自不同域（domain）的图片相互之间
+                    的映射函数，通常采用匹配的数据集训练神经网络。但在实际许多情境下，找到匹配的数据集是一件十分困难的事。<br><br>
+                    CycleGAN是一个基于GAN的图像翻译模型，它的优点在于不需要使用匹配的数据集也能完成效果不错的图像翻译任务，其创新之处在于
+                    训练GAN时引入循环一致性损失。设G是由X至Y的映射，F是由Y至X的映射，传统的GAN训练时需要满足\(G(X)\approx{Y}\)与
+                    \(F(Y)\approx{X}\)，而CycleGAN在此之外，还要满足\(F(G(X))\approx{X}\)与\(G(F(Y))\approx{Y}\)。引入循环一致性误差对
+                    生成图片质量的提升是显著的，下图展示了CycleGAN在迁移任务上的效果：
+                    <p class="text-center"><img src='raw/0003_1.png' width="600"></p>
+                </p>
+                <h2>Introduction</h2>
+                <p>
+                    图像翻译模型可以做什么？设想你在夏天去爬山，拍了一张风景图，然后盯着这张照片，便可以在脑海里想象出冬天这里的风景图。现在，
+                    只需要一个图像翻译模型便可生成出想象中的图片。如何实现图像翻译功能？考虑一个问题：<b>人脑是怎么做到想象的？</b>可能会回答，因为人
+                    经历过许多个冬天，于是便能将别处的冬天迁移到此地的冬天了。类比到计算机身上，只需要准备一个全是夏天景色的数据集，再准备一个
+                    全是冬天景色的数据集，让神经网络去学习夏天与冬天间的映射关系，就能让模型具备想象能力了。<br><br>
+                    先前的模型通常使用匹配的（paired）数据集，由于实际中匹配数据集难以收集，导致了生成模型的应用匮乏。CycleGAN的提出证明了使用
+                    不匹配（unpaired）的数据集依然能够生成出高质量的图片，大幅提高了生成模型的应用性。下图展示了两种数据集的区别：
+                    <p class="text-center"><img src='raw/0003_2.png' width="600"></p>
+                    使用这种不匹配的数据集会造成额外的mode collapse风险，即<b>生成器可能将许多张不同的图片映射到同一张图片</b>。举个例子，设想有2张照片，
+                    分别为夏天的北京与夏天的上海，生成器将两者都映射到冬天的广州，如果此时GAN的损失函数值也会非常的低，但结果显然不是我们想要的。
+                    为了克服这种问题，CycleGAN引入了循环一致性误差，<b>引导模型将夏天的北京映射到冬天的北京，将冬天的伤害映射到夏天的上海</b>。<br><br>
+                    具体操作就是增加了一个逆变换的损失来更新梯度：设G是由X至Y的映射，F是由Y至X的映射，在循环一致性的引导下，还应当满足\(F(G(X))\approx{X}\)
+                    与\(G(F(Y))\approx{Y}\)，这就确保了模型不会把夏天的北京映射到冬天的广州。
+                </p>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                    <li><a href="https://arxiv.org/abs/1703.10593">这篇论文的地址</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+    </div>
+</body>
+</html>
