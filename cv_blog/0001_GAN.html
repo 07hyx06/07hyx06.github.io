@@ -12,10 +12,9 @@
     <!-- Bootstrap core js -->
     <script src="../jquery-3.4.1.min.js"></script>
     <script src="../bootstrap/js/bootstrap.min.js"></script>
-    <!-- <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=AM_HTMLorMML-full"></script> -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=AM_HTMLorMML-full"></script>
     <nav class="navbar navbar-expand-sm bg-dark">
 		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
 	</nav>
@@ -30,13 +29,14 @@
             <div class="col-sm-8 blog-main">
                 <h2>Abstract</h2>
                 <p>
-                    GAN是一种新的深度学习生成模型框架，采用对抗训练的思路，同时训练一个生成器G（generator）和一个判别器D（discriminator）。
-                    生成器G负责捕获训练集的统计信息，并据此生成出新的数据；判别器D则负责判断输入的数据是否来自训练集。
-                    二者的训练过程可以类比于一个博弈过程：生成器G试图生成以假乱真的数据来欺骗判别器，而判别器D则希望准确判断出数据的真假。
-                    以上训练过程就是<b>对抗性训练</b>。<br><br>
+                    GAN是一种新的基于深度学习的生成模型框架。他采用对抗训练的思路，同时训练一个生成器G（generator）和一个判别器D（discriminator），
+                    其中G与D都是神经网络。<br><br>
+                    生成器G负责捕获训练集的统计信息，并据此生成出新的数据；判别器D则负责判断输入神经网络的数据是否来自训练集。
+                    二者的训练过程可以类比于一个二元博弈过程：生成器G试图生成以假乱真的数据来欺骗判别器，而判别器D则希望准确判断出数据的真假。
+                    以上描述的训练过程其实就是<b>对抗性训练</b>。<br><br>
                     当训练完成时，我们希望G足以生成出以假乱真的数据，而D则能够准确判断数据的真假。
-                    在理想情况下，训练完成后将G生成的数据输入D，D应当以50%的概率认为数据是真，以50%的概率认为数据是假。
-                    应当注意的是，在实际应用中，只有G起到作用，而D只是为了能够让G变得更好的一个辅助。
+                    <b>那么在理想情况下训练完成后，将G生成的假数据输入D，D应当以50%的概率认为数据是真，以50%的概率认为数据是假。</b>
+                    在实际应用中，只有G起到作用，而D只是为了能够让G变得更好的一个辅助。
                 </p>
                 <h2>Introduction</h2>
                 <p>
@@ -46,13 +46,13 @@
                     与D相比，G的应用就很少了，原因在于以下两点：
                     <ol>
                         <li>生成器难以捕获数据集的统计特征，因此生成新数据是很困难的。</li>
-                        <li>生成器的损失函数需要手工设计，但是又很难做到权衡数据的各种特征。</li>
+                        <li>生成器的损失函数需要手工设计，但是又很难做到权衡。</li>
                     </ol>
-                    GAN创新性地将<b>难以设计的生成器与发展成熟的判别器结合</b>，使得生成模型的效果显著提升。
-                    神经网络通常被描述为一个黑箱子：其弊端在于可解释性差，而利处体现在不需要人工做繁琐的特征工程。
-                    而上述两点生成器面临的困难恰恰就出在特征工程环节上。如此看来，用另一个神经网络D去评判神经网络G的好坏也是十分自然的。<br><br>
-                    下面再举一个例子，就能够更清楚的体会到GAN的思路了。我们可以将G理解为一个制作假钞的团队，将D理解为警察。
-                    警察的任务是检查出任何的假钞，而造假团队则希望逃过警察的眼睛。警察与造假团队的博弈，促使二者的能力都在不断变强。
+                    GAN创新性地将<b>难以设计的生成器与发展成熟的判别器结合</b>，使得生成模型的效果显著提升。<br><br>
+                    神经网络通常被描述为一个黑箱子：其弊端在于可解释性差，而利处体现在<b>不需要人工做繁琐的，启发式的特征工程</b>。
+                    而上述两点生成器面临的困难恰恰就出在特征工程环节上。因此GAN实际上是在用另一个神经网络D去评判G的好坏。<br><br>
+                    下面再举一个例子，就能够更清楚的体会到GAN的思路了。我们可以将G比作一个制作假钞的团队，将D比作警察。
+                    警察的任务是检查出每一张假钞，而造假团队则希望逃过警察的眼睛。警察与造假团队的博弈，促使二者的能力都在不断变强。
                     我们最后需要的，就是那个能够骗过最精英的警察（判别器D）的造假团队（生成器G）。
                 </p>    
                 <h2>Method</h2>
@@ -79,39 +79,39 @@
                             </tr>
                         </tbody>
                     </table>
-                    设<span>`x`</span>为训练集中的图片，<span>`p_{data}`</span>为训练集，<span>`z`</span>为噪声图片，
-                    <span>`p_z`</span>为<span>`G(z)`</span>的分布。对于判别器，判别器希望将属于<span>`p_{data}`</span>的数据分类为1，
-                    将属于<span>`p_z`</span>的数据分类为0。因此，判别器的优化目标如下：<br>
-                    <p class='text-center'><span>`max E_{x~p_{data}}[logD(x)]+E_{z~p_z}log(1-D(G(z))`</span></p>
+                    设\(x\)为训练集中的图片，\(p_{data}\)为训练集，\(z\)为噪声图片，
+                    \(p_z\)为生成图片也就是\(G(z)\)的分布。对于判别器来说，判别器希望区分出任何图片的真假，因此它希望将属于\(p_{data}\)的真数据分类为1，
+                    将属于\(p_z\)的生成数据分类为0。因此，判别器的优化目标如下：<br>
+                    <p class='text-center'>\(\max\limits_D E_{x~p_{data}}[logD(x)]+E_{z~p_z}log(1-D(G(z))\)</p>
                     生成器希望欺骗最优秀的判别器，因此在对抗训练过程中，G的优化目标为：
-                    <p class='text-center'><span>`min max E_{x~p_{data}}[logD(x)]+E_{z~p_z}log(1-D(G(z))`</span></p>
-                    作者提到在训练时，算法会先训练k次D再训练一次G.训练使用常规的mini-batch SGD优化器；实验中，作者取k=1。训练细节如下图：<br>
+                    <p class='text-center'>\(\min\limits_G \max\limits_D E_{x~p_{data}}[logD(x)]+E_{z~p_z}log(1-D(G(z))\)</p>
+                    在训练时，作者提出的算法会先训练k次D再训练一次G，这是由于G积累梯度时会比较慢。训练使用常规的mini-batch SGD优化器。训练细节如下图：<br>
                     <p class='text-center'><img src='raw/0001_1.png' width="600"></p>
-                    下图展示了GAN的训练过程中G与D的表现。其中黑点代表<span>`p_{data}`</span>，为训练集的分布；绿线代表
-                    <span>`G(z)`</span>的分布；蓝色虚线代表D输出的置信度分。<br>
+                    下图展示了GAN的训练过程中G与D的表现。其中黑点代表\(p_{data}\)，为训练集的分布；绿线代表
+                    \(G(z)\)的分布；蓝色虚线代表D输出的置信度分，范围[0,1]代表真假。<br>
                     <p class='text-center'><img src='raw/0001_2.png' width="600"></p>
                     <ul>
                         <li>
-                            图（a）为最初的GAN，此时判别器与生成器都是随机初始化的，可以看到D对于图片来自<span>`p_{data}`</span>或是
-                            <span>`p_z`</span>并不太准。并且<span>`p_{data}`</span>与<span>`p_z`</span>的分布差别较大。
+                            图（a）为训练初始时的情况。可以看到由于训练不够，置信度分出现振荡，说明此时的D区分能力并不强。
+                            与此同时G的生成能力也不强，这体现在\(p_{data}\)与\(p_z\)的分布差别较大。
                         </li>
                         <li>
-                            图（b）为训练一次D后的效果。此时D能准确的判断图片来自于<span>`p_{data}`</span>还是<span>`p_z`</span>，
-                            但由于还没有更新G，此时<span>`p_{data}`</span>与<span>`p_z`</span>的分布差别依然较大。
+                            图（b）为训练一次D后的效果。此时D能准确的判断图片来自于\(p_{data}\)还是\(p_z\)，
+                            但由于还没有更新G，此时\(p_{data}\)与\(p_z\)的分布差别依然较大。
                         </li>
                         <li>
-                            图（c）为训练一次G后的结果。此时<span>`p_{data}`</span>与<span>`p_z`</span>的分布差别缩小。
+                            图（c）为训练一次G后的结果。此时\(p_{data}\)与\(p_z\)的分布差别缩小。
                         </li>
                         <li>
-                            图（d）为理想的训练结果。我们可以看到，此时<span>`p_{data}`</span>与<span>`p_z`</span>基本吻合，而D已经分辨不出
-                            图片来自<span>`p_{data}`</span>还是<span>`p_z`</span>了，对于输入的图片给出的概率为0.5.
+                            图（d）为理想的训练结果。我们可以看到，此时\(p_{data}\)与\(p_z\)基本吻合，而D已经分辨不出
+                            图片来自\(p_{data}\)还是\(p_z\)了，对于输入的图片给出的概率为0.5.
                         </li>
                     </ul>
                 </p>
                 <h2>Experiments</h2>
                 <p>
                     论文中，将GAN在一些数据集上做了对比生成图片质量的实验。下图中，最后一列是GAN生成的结果，前面几列是之前的生成模型结果。
-                    可以看到，很明显，GAN生成图像的质量优于之前的模型。
+                    可以看到，很明显GAN生成图像的质量优于之前的生成模型。
                     <p class='text-center'><img src='raw/0001_3.png' width="600"></p>
                 </p>
                 <h2>Conclusion</h2>
@@ -119,10 +119,10 @@
                     原始GAN在训练时会遇到一种称为<b>mode collapse</b>的问题，即不论输入G的是什么，G都会产生同一张假图片，这就导致了
                     生成结果的多样性欠缺。这是由于D与G更新不同步 导致。如果D更新太快，会导致GAN无法收敛，G生成的假图片被D一眼看穿；
                     如果G更新太快，则会发生mode collapse问题，一个优秀的G与一个D竞争会导致G自满而不再进步。
-                    后面的论文重新设计了损失函数后，解决了GAN训练不稳定的问题。<br><br>
+                    后面WGAN的论文重新设计了损失函数后，解决了GAN训练不稳定的问题。<br><br>
                     原始GAN中生成器的输入是随机噪声。作者也提到了另外一种尝试，即将一幅真实图片输入生成器G，使其产生
-                    基于输入图片的新图片，这被称作Conditional GAN。在后面pix2pix，CycleGAN，UGATIT的论文中，使用这种思路，完成了图像翻译的任务。
-                    由此可见，GAN这一框架的功能强大。
+                    基于输入图片的新图片，这被称作Conditional GAN。在后面pix2pix，CycleGAN，UGATIT的论文中，使用这种思路完成了图像翻译的任务。
+                    由此可见GAN这一框架的功能与扩展性十分强大。
                 </p>
             </div>
         <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
