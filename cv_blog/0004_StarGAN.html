@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">StarGAN: Unified Generative Adversarial Networks for Multi-Domain Image-to-Image Translation</h1>
+            <p class="lead blog-description">将CycleGAN应用到多域迁移</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <h2>Abstract</h2>
+                <p>
+                    以<a href='0003_CycleGAN.html'>CycleGAN</a>为代表的一些算法在两个域之间的图像迁移任务上取得了很大的成功。当涉及到k个域的图像迁移任务时，这些算法只能将原问题转化为<b>任意两个域间的图像翻译任务的组合</b>，最终需要训练k(k-1)个生成器。这样的算法无疑是缺乏扩展性的。<br><br>
+                    StarGAN是一种<b>只需要训练一个生成器即可完成多个域之间互相迁移</b>的模型；同时，StarGAN也是<b>首个做到在不同数据集（celebA与RaFD）上联合训练同一个生成器</b>的模型。作者应用StarGAN完成了一些在人脸数据集上的表情迁移工作，证明了StarGAN既能高效完成多域迁移的任务，又能取得优于baseline模型的效果。
+                </p>
+                <h2>Introduction</h2>
+                <p>
+                    为了描述方便，考虑在一个人脸数据集上的图像翻译任务。定义<b>属性（attribute）为图片上一类有意义的特征信息</b>，例如发色，性别，年龄，表情等；定义<b>域（domain）为含有同一属性的图像集合</b>。例如，一个全是棕发女人的数据集就是一个域，一个全是老年男人的数据集也是一个域。我们希望完成的图像翻译任务就是将一个域的属性与另一个域的属性结合，在人脸数据集上的多域迁移预期效果如下图：
+                    <p class="text-center"><img src='raw/0004_1.png' width="600"></p>
+                    这项任务其实使用CycleGAN其实也能完成。假设需要处理4个域的迁移，那么训练好12个生成器就能完成任务。但是，如果此时任务更新了，需要完成5个域的图像翻译了，那么就还得额外训练8个新的生成器来满足需求。可见这种方法是十分低效率的。除此之外，这些生成器功能也是存在重复的。凭借常识我们知道人脸图片上有一些特征对于不同域之间的图像翻译是广泛存在的（例如脸型），如此看来，这些生成器岂不是把这些特征从零开始又学了一遍？上述算法的重复性训练也给了我们启示，<b>可以考虑只训练一个生成器，并根据输入的目标域来生成出不同的图像</b>，这就是StarGAN了，其结构与一般思路的对比如下：
+                    <p class="text-center"><img src='raw/0004_2.png' width="600"></p>
+                    为了使这个结构work，作者重新设计了网络结构。首先是生成器，因为涉及到多个域之间的迁移，<b>生成器接受的输入除了原始图片外，还有目标域的标签</b>；其次是判别器，除了需要判断图片真假外，还需要<b>判别图像属于哪个域</b>。在训练时，为了使生成器更灵活（flexibly），<b>StarGAN会随机的生成一组目标域标签来训练生成器</b>。StarGAN还提出了联合训练不同数据集的策略，具体见Method部分。
+                </p>
+                <h2>Method</h2>
+                <p>
+                    记生成器的输入标签为c，有：\(G(x,c)\rightarrow y\)；对于判别器，它需要输出判断真假的置信度分\(D_{src}(x)\)与分类标签\(D_{cls}(x)\)，即\(D:x\rightarrow{\{D_{src}(x),D_{cls}(x)}\}\)。作者引入了3种损失，首先为对抗性损失：
+                    <p class="text-center">\(\mathbb{L}_{adv}=\mathbb{E}_x[\log{D_{src}(x)}]+\mathbb{E}_{x,c}[\log{(1-D_{src}(G(x,c))}]\)</p>
+                    在训练判别器与生成器时，二者都是希望判别器能够将图片的域信息准确分类的，这一点从逻辑上讲很好理解。只不过在训练G与D时，分类损失的形式不同罢了。在训练判别器时，输入的是真实图片，因此分类损失可表示为：
+                    <p class="text-center">\(\mathbb{L}_{cls}^r=\mathbb{E}_{x,c'}[-\log{D_{cls}(c'|x)}]\)</p>
+                    而在训练生成器时，生成器不仅希望判别器能够将假图片分类为真，还能够将其分类到目标域之中：
+                    <p class="text-center">\(\mathbb{L}_{cls}^f=\mathbb{E}_{x,c}[-\log{D_{cls}(c|G(x,c))}]\)</p>
+                    仅有上面两种损失是不够的，还差了循环一致性损失。原因同CycleGAN，大概就是说<b>上面两种损失还不足以保证图像翻译的内容</b>，这其实是基于unpaired数据集的GAN都要面临的问题。举个例子，本来希望将一个金发女人的图片翻译为黑发女人，如果生成器产出了一张黑发男人，上面两种损失值也会很低，但显然这不是我们想要的。循环一致性损失定义如下：
+                    <p class="text-center">\(\mathbb{L}_{rec}=\mathbb{E}_{x,c,c'}[||x-G(G(x,c),c')||_1]\)</p>
+                    总结一下，训练判别器D时需要考虑的全部损失如下：
+                    <p class="text-center">\(\mathbb{L}_D=-\mathbb{L}_{adv}+\lambda_{cls}\mathbb{L}_{cls}^r\)</p>
+                    训练生成器时需要考虑的全部损失如下：
+                    <p class="text-center">\(\mathbb{L}_G=\mathbb{L}_{adv}+\lambda_{cls}\mathbb{L}_{cls}^f+\lambda_{rec}\mathbb{L}_{rec}\)</p>
+                    其中\(\lambda\)全部是用来平衡各损失的超参数，在论文的实验中一律采用\(\lambda_{cls}=1\)和\(\lambda_{rec}=10\)。
+                </p>
+                <h2>Code Analysis</h2>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                    <li><a href="https://arxiv.org/abs/1711.09020">这篇论文的地址</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+    </div>
+</body>
+</html>
