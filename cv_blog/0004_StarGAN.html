@@ -63,86 +63,89 @@
                     主要参考<a href='https://github.com/yunjey/stargan'>StarGAN的官方实现代码</a>在看源代码之前，首先了解下数据集。<b>celebA数据集</b>共有5个特征，包含发色，年龄等属性；<b>RaFD</b>数据集标记了表情信息，共8个特征。两个数据集之间有一个明确的差别，就是celebA数据集的特征是可以重复的，例如[1,0,1,0,0]这种标签是可能存在的，因为发色与性别，年龄等属性是不矛盾的；而在RaFD数据集中，所有的标签都是one-hot编码的，因为同一张人脸上不可能同时做出多个表情。下面主要讲解一个iter的训练过程。<br><br>
                     首先从loader中提取训练图片与标签，再随机生成目标域的标签：
                     <pre>
-                        #####################
-                        # 生成随机目标域标签 #
-                        #####################
-                        rand_idx = torch.randperm(label_org.size(0))
-                        label_trg = label_org[rand_idx]  
-                        
-                        x_real = x_real.to(self.device)           # Input images.
-                        c_org = c_org.to(self.device)             # Original domain labels.
-                        c_trg = c_trg.to(self.device)             # Target domain labels.
-                        label_org = label_org.to(self.device)     # Labels for computing classification loss.
-                        label_trg = label_trg.to(self.device)     # Labels for computing classification loss.
+
+#####################
+# 生成随机目标域标签 #
+#####################
+rand_idx = torch.randperm(label_org.size(0))
+label_trg = label_org[rand_idx]  
+
+x_real = x_real.to(self.device)           # Input images.
+c_org = c_org.to(self.device)             # Original domain labels.
+c_trg = c_trg.to(self.device)             # Target domain labels.
+label_org = label_org.to(self.device)     # Labels for computing classification loss.
+label_trg = label_trg.to(self.device)     # Labels for computing classification loss.
                     </pre>
                     之后训练判别器。一共包含3类损失，为对抗性损失，分类损失与梯度惩罚损失（这一部分将在WGAN论文笔记中说明，在此省略）：
                     <pre>
-                        out_src, out_cls = self.D(x_real)
-                        out_src, out_cls = self.D(x_fake.detach())
-                        x_fake = self.G(x_real, c_trg)
 
-                        #############
-                        # 对抗性损失 #
-                        #############
-                        d_loss_real = - torch.mean(out_src)
-                        d_loss_fake = torch.mean(out_src)
+out_src, out_cls = self.D(x_real)
+out_src, out_cls = self.D(x_fake.detach())
+x_fake = self.G(x_real, c_trg)
 
-                        ###########
-                        # 分类损失 #
-                        ###########
-                        d_loss_cls = self.classification_loss(out_cls, label_org, self.dataset)
+#############
+# 对抗性损失 #
+#############
+d_loss_real = - torch.mean(out_src)
+d_loss_fake = torch.mean(out_src)
 
-                        ###############
-                        # 梯度惩罚损失 #
-                        ###############
-                        
-                        ###########
-                        # 更新梯度 #
-                        ###########
-                        d_loss = d_loss_real + d_loss_fake + self.lambda_cls * d_loss_cls + self.lambda_gp * d_loss_gp
-                        self.reset_grad()
-                        d_loss.backward()
-                        self.d_optimizer.step()
+###########
+# 分类损失 #
+###########
+d_loss_cls = self.classification_loss(out_cls, label_org, self.dataset)
+
+###############
+# 梯度惩罚损失 #
+###############
+
+###########
+# 更新梯度 #
+###########
+d_loss = d_loss_real + d_loss_fake + self.lambda_cls * d_loss_cls + self.lambda_gp * d_loss_gp
+self.reset_grad()
+d_loss.backward()
+self.d_optimizer.step()
                     </pre>
                     在上面的程序中，出现了<code>x_fake = self.G(x_real, c_trg)</code>这步。下面具体解释一下标签是如何与原始图片一起被送进生成器的。假设celebA数据集上某张图片的标签为[1,0,0,1,0]，原始图片的尺寸为[1,3,256,256]。StarGAN的做法是<b>将标签先扩充为[1,5,256,256]的尺寸后再与原始图片拼接，最终得到[1,8,256,256]的图片后一起喂给生成器。</b>具体怎么扩充呢，还是以[1,0,0,1,0]这个标签为例，扩充之后标签将包含3个256*256的全是0的矩阵与2个256*256的全是1的矩阵。扩充操作的代码可见<code>model.py</code>文件：
                     <pre>
-                        def forward(self, x, c):
-                            # Replicate spatially and concatenate domain information.
-                            c = c.view(c.size(0), c.size(1), 1, 1)
-                            c = c.repeat(1, 1, x.size(2), x.size(3))                           
-                            x = torch.cat([x, c], dim=1)
-                            ret = self.main(x) 
-                            return ret
+
+def forward(self, x, c):
+    # Replicate spatially and concatenate domain information.
+    c = c.view(c.size(0), c.size(1), 1, 1)
+    c = c.repeat(1, 1, x.size(2), x.size(3))                           
+    x = torch.cat([x, c], dim=1)
+    ret = self.main(x) 
+    return ret
                     </pre>
                     训练判别器还有一点需要说明，在计算分类误差时，<b>对于celebA数据集采用BCE损失，对于RaFD数据集时采用交叉熵损失</b>。这是因为celebA的多个属性之间是不矛盾的，因此需要将其拆解为5个二分类问题计算损失。举个例子，celebA中[0,0,1,1,0]是可能的一种标签，而在RaFD中，显然标签中的1只能出现一次。<br><br>
                     StarGAN的生成器与判别器不是同步训练的，而是默认等判别器训练5次后，再更新一次生成器的梯度。对于生成器，也有3种损失，包括对抗性损失，分类损失与循环一致性损失：
                     <pre>
-                        x_fake = self.G(x_real, c_trg)
-                        out_src, out_cls = self.D(x_fake)
-                        x_reconst = self.G(x_fake, c_org)
+x_fake = self.G(x_real, c_trg)
+out_src, out_cls = self.D(x_fake)
+x_reconst = self.G(x_fake, c_org)
 
-                        #############
-                        # 对抗性损失 #
-                        #############
-                        g_loss_fake = - torch.mean(out_src)
+#############
+# 对抗性损失 #
+#############
+g_loss_fake = - torch.mean(out_src)
 
-                        ###########
-                        # 分类损失 #
-                        ###########
-                        g_loss_cls = self.classification_loss(out_cls, label_trg, self.dataset)
+###########
+# 分类损失 #
+###########
+g_loss_cls = self.classification_loss(out_cls, label_trg, self.dataset)
 
-                        #################
-                        # 循环一致性损失 #
-                        #################                       
-                        g_loss_rec = torch.mean(torch.abs(x_real - x_reconst))
+#################
+# 循环一致性损失 #
+#################                       
+g_loss_rec = torch.mean(torch.abs(x_real - x_reconst))
 
-                        ###########
-                        # 更新梯度 #
-                        ###########
-                        g_loss = g_loss_fake + self.lambda_rec * g_loss_rec + self.lambda_cls * g_loss_cls
-                        self.reset_grad()
-                        g_loss.backward()
-                        self.g_optimizer.step()
+###########
+# 更新梯度 #
+###########
+g_loss = g_loss_fake + self.lambda_rec * g_loss_rec + self.lambda_cls * g_loss_cls
+self.reset_grad()
+g_loss.backward()
+self.g_optimizer.step()
                     </pre>
                 </p>
                 <h2>Discussion</h2>
