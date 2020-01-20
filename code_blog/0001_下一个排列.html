@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">求解下一个排列</h1>
+            <p class="lead blog-description">寻找一个线性复杂度的原地算法</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <h2>问题描述</h2>
+                <p>
+                    给定一个\(1,..,n\)的排列，求解最小的比他大的排列顺序。例如：\(12345\)的下一个排列是\(12354\)，\(54312\)的下一个排列是\(54321\)。要求：使用o(n)的时间复杂度与o(1)的空间复杂度。
+                </p>
+                <h2>解决方案</h2>
+                <p>
+                    什么样的序列没有下一个排列？只有\(5,4,3,2,1\)这种逆序数列。如果存在\(a[j]>{a[j-1]}\)，这种数列必然是有下一个排列的，最简单来说，将\(a[j]\)与\(a[j-1]\)互换后得到的新序列就比原先的序列大，但它不一定是最小的比他大的序列。另一方面，算法要求原地进行，即o(1)的空间复杂度，所以只能通过元素的交换来实现。一种自然的思路是<b>从右往左扫这个序列</b>，扫到第一个\(j\)满足\(a[j]>{a[j-1]}\)就将其交换。<br><br>
+                    来看下面的例子：\(1,9,8,4,7,6,5,3,2\)，从右往左扫描，发现\(a[4]>{a[3]}\)，即7比4大，所以需要交换4。这时4后面的序列有一个性质，就是<b>必然按照降序排列</b>。那么4该换到哪呢？4后面的数中比它大的最小的数是5，因此将4和5交换，原序列变成：\(1,9,8,5,7,6,4,3,2\)。注意交换之后，后面的序列<b>依旧保持降序的性质</b>。此时再把后面的序列倒过来，就得到最后一个排列了：\(1,9,8,5,2,3,4,6,7\)。<br><br>
+                    总结一下，对于一个序列\(a_1,a_2,...,a_n\)，它的下一个排列可以通过如下步骤来找：<br>
+                    第一步，从后往前扫描序列，找到第一个满足\(a[j]>{a[j-1]}\)的\(j\)；<br>
+                    第二步，在\(a_j,a_{j+1},...,a_n\)中找到比\(a[j-1]\)大的最小的数，将其与\(a[j-1]\)交换；<br>
+                    第三步，将序列\(a_j,a_{j+1},...,a_n\)倒置即得到下一个排列。<br>
+                    很显然，上面每一步的复杂度都是o(n)，因此算法的总时间复杂度为o(n)，空间复杂度为o(1)。
+                </p>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                    <li><a href="https://leetcode-cn.com/problems/next-permutation/">LeetCode31：下一个排列</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+    </div>
+</body>
+</html>
