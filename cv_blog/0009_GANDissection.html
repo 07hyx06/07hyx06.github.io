@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">GAN Dissection: Visualizing and Understanding Generative Adversarial Networks</h1>
+            <p class="lead blog-description">GAN的可视化方法</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <h2>Introduction</h2>
+                <p>
+                    GAN有关的论文十分多，但是很少有研究能够回答GAN究竟是如何生成图像的。<b>这篇论文结合语义分析方法，提出了一种解释GAN的框架。</b>应用这个可视化框架，研究人员可以更好的理解GAN，并提高GAN的生成水平。作者通过下面两步来解决可视化的问题：
+                    <ul>
+                        <li>
+                            Dissection：找到生成图片上某一类物体对应的激活feature map，如下图的第二行。
+                        </li>
+                        <li>
+                            Intervention：失活一些feature map，使得生成图片上一些类别的物体消失，如下图第三行；再重新激活这些feature map，使得生成图片上重新出现这些物体，如下图第四行。
+                        </li>
+                    </ul>
+                    <p class="text-center"><img src='raw/0009_1.png' width="600"></p>
+                </p>
+                <h2>Method</h2>
+                <p>
+                    论文的baseline模型是unconditional的GAN。设输入为\(z\)，某一层feature map可表示为\(r=h(z)\)，最终的生成结果\(x=f(r)=f(h(z))=G(z)\)。现在的\(r\)代表一堆feature map，其尺寸为\(C\times H\times W\)。一般来说，\(H,W\)都要分别小于输入图片的高和宽。不妨设\(r\)的通道数为64，编码为\(r_0,...,r_{63}\)。这些feature map中，可能一些是用来生成树的，一些是用来生成房子的，还有一些是用来生成天空的。<b>我们现在考虑一个具体的问题：究竟哪些feature map是用来生成树的？</b><br><br>
+                    设用来生成树的feature map集合为\(\{r_{tree}\}\)，剩下的集合为\(\{r_{notree}\}\)，那么可以将\(r\)分解为：
+                    <p class="text-center">\(r=\{r_{tree},r_{notree}\}\)</p>
+                    现在的问题是去找到\(\{r_{tree}\}\)，即找到影响结果中树的生成的feature map。这一步用到了语义分割技术。<b>首先，得到生成图片中树这一类别的语义分割图\(s_c(X)\)；枚举\(r_0,...,r_{63}\)，分别计算其与\(s_c(X)\)的交并比（IOU）</b>。作者采用下面这种IOU计算方式，以\(r_0\)为例：第一步，将\(r_0\)尺寸调整到原图大小，得到\(r'_0\)；第二步，将\(r'_0\)按照一个阈值做二值化。关于阈值的选取，文中的做法是在验证集上找到能够使得平均交并比最大的阈值。上面的流程就是文中的这张图：
+                    <p class="text-center"><img src='raw/0009_2.png' width="600"></p>
+                    作者在1000张生成图片中，找到了10张平均交并比最大的feature map，效果如下图。可见这些feature map确实能够反映出某一类别的物体是如何被生成的。值得注意的是，这些feature map的位置只与分析的类别有关，而与输入的图像无关。
+                    <p class="text-center"><img src='raw/0009_3.png' width="600"></p>
+                    <b>至此，上面的工作完成了Dissection的任务，下面进入Intervention的部分。</b>如何衡量feature map对最终生成物体的重要程度？一个手段是将其失活再激活，再计算loss：
+                    <p class="text-center"><img src='raw/0009_4.png' width="600"></p>
+                    其中，失活是将一张feature map上的所有权值取0，激活是将所有权值变成\(k\)。但是这种方法只能计算单张feature map对结果的影响。<b>实际上，feature map之间的关系是藕断丝连的，失活其中的一张，可能只会少一片树叶。</b>那么如何才能完整去掉图片上的树呢？作者想到可以对其加权求和，训练权重使得loss最大，这样对应的失活图片就是没有树的，而激活图片就是生成出比原图更多棵树的。最终的方法如下：
+                    <p class="text-center"><img src='raw/0009_5.png' width="600"></p>
+                    上面介绍的Intervention过程体现为下面这张图：
+                    <p class="text-center"><img src='raw/0009_6.png' width="600"></p>
+                </p>
+                <h2>Result</h2>
+                <p>
+                    这篇文章的结果主要说明了这种可视化方法的应用方向，我就挑有意思的做笔记了。<b>第一点，随着层数加深，GAN学习到了越来越细致的特征。</b>
+                    <p class="text-center"><img src='raw/0009_7.png' width="600"></p>
+                    <b>第二点，用来生成某一类别的feature map的数量与反映图片质量的SWD指标变化是一致的。所以可以凭借此衡量GAN的结果。</b>
+                    <p class="text-center"><img src='raw/0009_8.png' width="600"></p>
+                    <b>第三点，使用Intervention的方法消除杂点可以手动提高生成图片的质量。</b>
+                    <p class="text-center"><img src='raw/0009_9.png' width="600"></p>
+                    <b>第四点，可以手动编辑图像，例如减少图片中的窗户，树木等。</b>
+                    <p class="text-center"><img src='raw/0009_10.png' width="600"></p>
+                </p>
+                <h2>Comments</h2>
+                <p>
+                    这篇论文的应用方向全部都是需要人工调整的。但是使用这个模型，可以生成连续的训练集，达到调一个滑钮让树木连续变少的效果，可以和ShapeMatchingGAN的思路结合。
+                </p>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                    <li><a href="https://arxiv.org/abs/1811.10597?context=cs.LG">这篇论文的地址</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+    </div>
+</body>
+</html>
