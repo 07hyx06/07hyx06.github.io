@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">Self Information and Entropy</h1>
+            <p class="lead blog-description">信息熵的定义及性质推导</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <h2>信息量化</h2>
+                <p>
+                    什么是信息？香农给出的定义是：information=uncertainty，<b>信息就是不确定性</b>。假如两个人谈话，对方说的你提前都知道了，那对你来说就不算信息了。信息论是一门数学，因此需要将信息量化。记事件\(E\)携带的信息量为\(\mathscr{I}(E)\)，其应当满足下面3个基本性质，<b>这在信息论中被视为公理</b>：<br>
+                    <ol>
+                        <li>
+                            <b>记\(p_E\)为事件\(E\)发生的概率，则\(\mathscr{I}(E)=I(p_E)\)为一单减函数</b>。直观上这是想得通的，事件发生的概率越小，新鲜程度越高，信息量就应当越大；如果一个事件发生的概率是1，对人来说就不算未知或信息了。
+                        </li>
+                        <li>
+                            <b>\(I(p_E)\)随\(p_E\)连续变化</b>。即\(I(p_E)\)是\(p_E\)的连续函数，这个定义比较自然。
+                        </li>
+                        <li>
+                            <b>若事件\(E_1\)与\(E_2\)独立，那么有\(\mathscr{I}(E_1\cap{E_2})=\mathscr{I}(E_1)+\mathscr{I}(E_2)\)，\(I(p_{E_1}\times{p_{E_1}})=I(p_{E_1})+I(p_{E_2})\)</b>即两个事件同时发生带来的信息等于各自单独发生带来的信息量之和。
+                        </li>
+                    </ol>
+                    有了这三条公理，<b>香农指出\(I(p)\)只可能有一种形式，就是\(I(p)=-c\log_bp\)</b>。定理证明的过程类似于经典的柯西方程证明方法。<br><br>
+                    <b>第一步：证明当\(n\)为正整数时，\(I(\frac{1}{n})=-c\log_b\frac{1}{n}\)。</b><br>
+                    当\(n=1\)时，根据公理3：\(I(1\times1)=I(1)+I(1)\)，得到\(I(1)=0=-c\log_b1\)。故\(n=1\)时成立。<br>
+                    当\(n=2,3,...\)时，任取\(r\)，存在\(k\)满足\(n^k<{2^r}<{n^{k+1}}\)。有公理1中\(I(p)\)的单减性质，有：
+                    <p class="text-center">
+                        \(I(\frac{1}{n^k})\leq I(\frac{1}{2^r})< I(\frac{1}{n^{k+1}})\)
+                    </p>
+                    再由公理3，将乘法变成加法，得到：
+                    <p class="text-center">
+                        \(kI(\frac{1}{n})\leq rI(\frac{1}{2})< (k+1)I(\frac{1}{n})\)
+                    </p>
+                    整理得到：
+                    <p class="text-center">
+                        \(\frac{k}{r}\leq \frac{I(\frac{1}{2})}{I(\frac{1}{n})}\leq \frac{k+1}{r}\)
+                    </p>
+                    另一方面，对不等式\(n^k<{2^r}<{n^{k+1}}\)直接取对数，得到：
+                    <p class="text-center">
+                        \(\frac{k}{r}\leq \frac{\log_b 2}{\log_b n}\leq \frac{k+1}{r}\)
+                    </p>
+                    此时令\(r\rightarrow \infty\)，得到：
+                    <p class="text-center">
+                        \(\frac{\log_b 2}{\log_b n}=\frac{I(\frac{1}{2})}{I(\frac{1}{n})}\)
+                    </p>
+                    故\(I(\frac{1}{n})=-c\log_b\frac{1}{n}\)得证。<br><br>
+                    <b>第二步，证明当\(p=\frac{r}{s}\)为有理数时，有\(I(\frac{r}{s})=-c\log_b\frac{r}{s}\)。</b><br>
+                    注意到：
+                    <p class="text-center">
+                        \(I(\frac{1}{s})=I(\frac{r}{s}\times{\frac{1}{r}})=I(\frac{r}{s})+I(\frac{1}{r})\)
+                    </p>
+                    因此有：
+                    <p class="text-center">
+                        \(I(\frac{r}{s})=I(\frac{1}{s})-I(\frac{1}{r})\)
+                    </p>
+                    代入第一步的结论，故\(I(\frac{r}{s})=-c\log_b\frac{r}{s}\)得证。<br><br>
+                    <b>第三步，证明对于任意实数，有\(I(p)=-c\log_b p\)。</b><br>
+                    取两个有理数列分别从上下逼近这个数，由单调有界原理知这两个数列都有极限，再由公理2连续性知极限相等，综上\(I(p)=-c\log_b p\)得证。信息理论中，取\(c=1\)。
+                </p>
+                <h2>信息与熵的关系</h2>
+                <p>
+                    <b>熵的定义为信息量的期望值</b>。由前面的结论，事件\(X\)的熵为：
+                    <p class="text-center">
+                        \(H(X)=\mathbb{E}[I(X)]=\sum\limits_{x\in X}P_X(x)\log{\frac{1}{P_X(x)}}\)
+                    </p>
+                    在工程中，信息一般由01组成的二进制串编码，因此约定熵中\(\log\)的底数为2。不难看出，<b>熵永远是非负的，</b>当且仅当\(P_X(x)=1\)时\(H(X)=0\)。直观上也很好理解，当\(X\)为必然事件时，事件没有了不确定性，熵自然就是0了。第二点，<b>当\(P_X(x)\)服从均匀分布时，熵最大</b>。这一点同样很好理解，如果一个人告诉你，明天的聚会他有50%的可能来，50%的可能来，你是最懵的；如果他说有70%的可能来，30%的可能不来，那你得到的信息是他来的可能性大一点。<br><br>
+                    <b>随机向量\((X,Y)\)的联合熵定义为</b>：
+                    <p class="text-center">
+                        \(H(X,Y)=\sum\limits_{(x,y)\in (X,Y)}P_{X,Y}(x,y)\log{\frac{1}{P_{X,Y}(x,y)}}\)
+                    </p>
+                    <b>随机变量\(X,Y\)的条件熵定义为</b>：
+                    <p class="text-center">
+                        \(H(Y|X)=\sum\limits_{x\in X}P_X(x)(\sum\limits_{y\in Y}P_{Y|X}(y|x)\log{\frac{1}{P_{Y|X}(y|x)}})\)
+                    </p><br>
+                    熵与条件熵，联合熵之间满足性质1称为<b>链式法则</b>：
+                    <p class="text-center">
+                        \(H(X,Y)=H(X)+H(Y|X)\)
+                    </p>
+                    上面这个性质可以由公理3与条件概率性质\(P_{X,Y}(x,y)=P_{X}(x)P_{Y|X}(y|x)\)证明。<br><br>
+                    此外，熵还满足性质2：\(H(X)\geq H(X|Y)\)。这条性质在直观上同样很好理解：得知了事件\(Y\)后，事件\(X\)的不确定性会下降，反应为熵减少。等号成立当且仅当\(X,Y\)两事件独立。综合上面的两条性质，如果\(X,Y\)独立，那么就有：\(H(X,Y)=H(X)+H(Y)\).
+                </p>
+                <h2>附录</h2>
+                <p>
+                    上面的所有涉及到小于等于或是大于等于的证明，都是可以通过下面两个不等式直接做差证的。证明的技巧都是去掉令人讨厌的\(\log\)。<b>证明的过程并不十分重要，真正重要的是每条性质背后的直觉。</b><br><br>
+                    <b>1. Fundamental Inequilty</b>：
+                    <p class="text-center">
+                        \(\log_D(x)\leq (x-1)\log_D(e)\)
+                    </p>
+                    <b>2. Log-Sum Inequilty</b>：
+                    <p class="text-center">
+                        \(\sum\limits_i a_i\log{\frac{a_i}{b_i}\geq (\sum\limits_i a_i)\log \frac{\sum\limits_i a_i}{\sum\limits_i b_i}}\)
+                    </p>
+                </p>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+    </div>
+</body>
+</html>
