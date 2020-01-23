@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">凸包02：凸包进阶算法</h1>
+            <p class="lead blog-description">走向\(o(n\log n)\)复杂度</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <p>
+                    在上文中提到的四种算法中，算法三与算法四的时间复杂度达到了\(o(n^2)\)。不禁要问，是否存在更好的算法？答案是肯定的，<b>可以证明，凸包问题的时间复杂度下限为\(o(n\log n)\)</b>。
+                    <br><br>
+                    在介绍进阶算法之前，先来证明这个下界的存在性。设<b>算法\(A\)</b>为任意一种凸包算法，现在来考虑对序列\(a_1,a_2,...,a_n\)的<b>排序问题</b>。将这些点映射到抛物线\(y=x^2\)上，得到平面上\(n\)个点\((a_1,a_1^2),...,(a_n,a_n^2).\)应用<b>算法\(A\)</b>求解这\(n\)个点的凸包，<b>显然这个凸包一定包含所有\(n\)个点</b>。记凸包以最左边的点为起点，按照逆时针的排列数序为\((a_{1’},a_{1’}^2),...,(a_{n’},a_{n’}^2)\)，则\(a_{1'},...,a_{n'}\)就是最终的递增序列。<b>另一方面，排序问题的下界是\(o(n\log n)\)，因此算法\(A\)的下界也是\(o(n\log n)\)，不然将算法\(A\)用来排序会得出矛盾。</b>
+                    <p class="text-center"><img src='raw/0003_1.jpg' width="400"></p>
+                    <br>
+                    <b>算法五（Graham Scan算法）</b>：这是第一个\(o(n\log n)\)的凸包算法。首先需要确定1个极点出来，经过算法四的铺垫，通过\(LowestThenLeftmost\)就可以用\(o(n)\)的复杂度办到。之后，以这个极点为中心，对其它\(n-1\)个点做<b>极角排序</b>。算法四中找最左侧点的策略是把\(cmp\)函数改成\(ToLeft\)测试后扫一遍点用\(o(n)\)的复杂度完成，<b>那如果要做极角排序，也是改写\(cmp\)，再调用\(sort\)即可完成，时间复杂度与普通排序相同（这是因为\(ToLeft\)测试是\(o(1)\)时间的），为\(o(n\log n)\)。</b>经过极角排序后，就得到了下图。
+                    <p class="text-center"><img src='raw/0003_2.jpg' width="400"></p>
+                    除了展示极角排序结果外，图片中还有2个栈用来实现算法。初始时，将原点与排序后最小的点（两个点都一定是最终的极点）压入\(S\)栈，将其余点按从小到大顺序压入\(T\)栈，之后开始循环：
+                    <pre>
+
+while T不空：
+    s1 = S.top(); S.pop() //取出S栈顶的两个点
+    s2 = S.top();
+    t1 = T.top();
+    if ToLeft(s2,s1,t1):
+        S.push(s1)
+        S.push(t1)
+        T.pop()
+                    </pre>
+                    举个例子，4号点在23边的左侧，因此将它收入\(S\)；5号点在34边的右侧，说明4肯定不是极点，因此将其弹出\(S\)。这个循环扫点的过程就是算法名字中的\(scan\)。<b>每次操作要么\(T\)弹出一个点，要么\(S\)弹出一个点，因此循环次数为\(o(n)\)。所以算法五总的时间复杂度为\(o(n\log n)\)。</b>
+                    <br><br>
+                    如果初始时平面的点是关于横坐标有序的，应用算法五的思想，甚至可以\(o(n)\)的时间求凸包。<b>算法设计的关键在于如何将横坐标有序转化成极角有序。实际上，取纵坐标为负无穷（或正无穷）的点为原点，关于横坐标有序就会转化成关于极角有序</b>。如果取负无穷为原点，就可以确定凸包的上侧极点；取正无穷为原点，就可以确定下侧极点二者结合就得到了最终的凸包。
+                    <p class="text-center"><img src='raw/0003_3.jpg' width="600"></p>
+                    最后，是两个分治算法。分治算法的本质都是把两个小凸包合并成为一个大的凸包。<b>算法六</b>与归并排序十分类似。如果以凸包的内点为原点，那么极点就是关于这个内点有序的。<b>所以两个凸包可以看成是两个极角有序的序列，合并操作就是在做\(Merge\)。</b>
+                    <br><br>
+                    怎么找一个凸包的内点？取三个极点，然后算它们的重心就好了，只需要\(o(1)\)复杂度。如果第一个凸包的内点不是第二个凸包的内点，怎么办？这时，可以借鉴算法三的思路，付出\(o(n)\)复杂度的代价，调整第二个凸包，使这个点成为内点。
+                    <p class="text-center"><img src='raw/0003_4.jpg' width="400"></p>
+                    <b>因此理论上任何两个凸包经过\(Merge\)后都可以变成下图这种位置关系</b>。此时再做一遍\(scan\)，花费\(o(n)\)的复杂度即可合并成功。
+                    <p class="text-center"><img src='raw/0003_5.jpg' width="400"></p>
+                    算法六需要讨论两个凸包的位置关系。如果事先对平面上所有点关于横坐标排序，这样可以保证应用分治策略时，需要合并的凸包可以用一条竖直线分隔开来。
+                    <p class="text-center"><img src='raw/0003_6.jpg' width="400"></p>
+                    合并这两个凸包，我们的实际操作是首先找到左边的子凸包的最右边的点，然后找到右边子凸包最左边的点（<b>每次合并后更新凸包最左，最右的点，可以让这步只花费\(o(1)\)的复杂度</b>），之后做\(ZigZag\)操作，找到两个凸包的公切线。这一步操作类似于快排，初始时连接\(rl\)，然后向上移动\(l\)，直到右边凸包端点的前驱后继都在这条线的一侧，再向上移动\(r\)。<b>\(l\)与\(r\)不断切换，当二者都不能移动时，就找到了公切线，时间复杂度为\(o(n)\)。所以算法七的总复杂度为\(o(n\log n)\)。</b>
+                    <p class="text-center"><img src='raw/0003_7.jpg' width="400"></p>
+                    到此，求解凸包已经有7个算法了，但是上面一切算法都是建立在理想条件下的，即<b>没有重合点，没有三点共线</b>。要解决这些退化情况，还需要加入一些特判，但是不会影响最终的复杂度。
+                </p>
+            </div>
+            <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+                <div class="sidebar-module">
+                    <h4>友情链接</h4>
+                    <ol class="list-unstyled">
+                        <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                    </ol>
+                    <h4>联系我</h4>
+                    <p>1025723614@qq.com</p>
+                </div>
+            </div>
+        </div>
+    <div>
+</body>
+</html>
