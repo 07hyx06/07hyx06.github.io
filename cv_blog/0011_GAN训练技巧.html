@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">训练GAN的10个技巧</h1>
+            <p class="lead blog-description">转载来的，怕哪天需要用到却找不到了</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <h3>1.稳定性与容量</h3>
+                <p>
+                    在训练过程的早期，判别器的对抗损失总是趋于零，而生成器的损失却非常高。<b>但是这往往不是由于生成器结构简单，容量不足所导致的。</b>这种情况不建议修改网络结构，不论是扩大生成器还是减弱判别器，因为原因通常出现在别的地方。
+                </p>
+                <h3>2.提前停止</h3>
+                <p>
+                    一个常见错误是，当你看到生成器或鉴别器损失突然增加或减少时，立即停止训练。实际上，GAN的训练过程中，损失的上升或是下降是随机的。<b>许多很好的实验结果最后生成器的损失都是远高于判别器的，这是完全正常的。</b>因此建议训练时主要关注生成图片的质量，而非损失数值。
+                </p>
+                <h3>3.损失函数的选择</h3>
+                <p>
+                    曾经有论文对一些经典损失函数做了实验，<b>发现其实选择哪个损失函数并不重要，没有哪个函数绝对优于其他函数，GAN能够在每个不同的情况下学习</b>。因此建议从最简单的损失函数入手，一步步尝试更改。
+                </p>
+                <h3>4.平衡生成器和判别器的权重更新</h3>
+                <p>
+                    在许多GAN论文中，特别是一些早期的论文中，实现部分中经常可以看到作者每更新生成器两次或三次才更新一次判别器。这种策略其实是无效的，真正有帮助的策略在下文中。
+                </p>
+                <h3>5.模式坍塌和学习率</h3>
+                <p>
+                    模式坍塌指输入的每个可能潜向量经由生成器后都变成同一个图像。<b>建议使用最直接的解决方案是尝试调整GAN的学习率，使用一个较低的学习率并从头开始训练，因为模式坍塌往往发生在早先的几轮训练中。</b>
+                </p>
+                <h3>6.加噪声</h3>
+                <p>
+                    众所周知，增加判别器的训练难度有利于提高系统的整体稳定性。<b>在真实数据和合成数据中添加噪声是一个不错的选择。</b>
+                </p>
+                <h3>7.标签平滑</h3>
+                <p>
+                    实现相同目标的另一种方法是标签平滑，这更容易理解和实现：<b>如果真实图像的标签设置为1，我们将它更改为一个较低的值，比如0.9</b>。这个解决方案不鼓励鉴别器对其分类过于自信，或者换句话说，不依赖非常有限的一组特征来判断图像是真还是假。
+                </p>
+                <h3>8.多尺度梯度</h3>
+                <p>
+                    将跨层链接的思想应用到GAN中，pix2pix中的\(U-Net\)就是这种结构。<b>这种结构可以训练生成更大的图片。</b>
+                </p>
+                <h3>9.TTUR</h3>
+                <p>
+                    Two Time-Scale Update Rule。一般来说，建议为鉴别器选择更高的学习速度，而为生成器选择更低的学习速度。这样一来，生成器就必须采取更小的步骤来欺骗鉴别器，并且不会选择快速、不精确和不现实的解决方案来赢得对弈。<b>为了给出一个实际的例子，我经常为判别器选择0.0004，为生成器选择0.0001，这些值在一些项目中运行得很好</b>。请记住，在使用TTUR时，你可能会注意到生成器的具有更好的损失。
+                </p>
+                <h3>10.谱归一化</h3>
+                <p>
+                    在SAGAN中提到过这种技术。<b>谱归一化是应用于卷积核上的特殊归一化操作，可以极大地提高训练的稳定性</b>。它最初只在鉴别器中使用，后来被证明用于生成器的卷积层也是有效的。
+                </p>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                    <li><a href="https://towardsdatascience.com/@marco.pasini">原文连接</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+    </div>
+</body>
+</html>
