@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">StarGAN v2: Diverse Image Synthesis for Multiple Domains</h1>
+            <p class="lead blog-description">latent code+条件GAN</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <h2>Introduction</h2>
+                <p>
+                    一个好的\(image~to~image\)图像翻译模型应当满足<b>生成结果多样化与模型的可扩展性</b>。\(StarGANv1\)可以完成第二个任务：相比于\(CycleGAN\)，它可以只用一个生成器完成多个域的图像翻译，而不需要训练\(n(n-1)\)只能完成2个域图像翻译的生成器。但是对于第一个任务，多样性一般是非条件\(GAN\)的一项指标。<b>想要由条件\(GAN\)的生成器得到多样性的生成结果，需要引入随机性。\(StyleGAN\)中的\(latent~code\)是一个好的参考。</b>
+                </p>
+                <h2>Method</h2>
+                <p>
+                    回想一下\(StyleGANv1\)是怎么在生成器中指导目标域的，它其实是直接在\(3*256*256\)的输入图像后直接拼接一个\(domain~mask\)，使输入变成\(8*256*256\)。训练的时候，是随机挑选一个\(domain~label\)做图像翻译，计算损失。<br><br>
+                    \(StyleGANv2\)与\(StyleGANv1\)的不同之处在于，<b>\(domain~mask\)不再是一个认为指定的\(256*256\)的全是1的矩阵，而是通过神经网络生成\(style~code\)</b>。\(StyleGANv2\)可以完成两个任务，第一个是\(domain\)指导的图像翻译（这一点v1也能够完成，不过多样性差点）；第二个则是\(image\)指导的图像翻译，这是一个新功能，效果见下图：
+                    <p class="text-center"><img src='raw/0012_1.png' width="600"></p>
+                    整个模型分为生成器，映射网络，编码器，判别器。生成器接受原图像与\(style~code\)，类似于v1；判别器其实最后再做\(N_{domain}\)个二分类任务，与v1相同，这是因为\(celebA\)数据集不是\(one-hot\)的；<b>映射网络是为了完成\(domain\)指导的图像翻译</b>，是一个\(MLP\)结构，用来将随机的\(latent~code\)转换为各个域的\(style~code\)；<b>编码器是为了完成\(image\)指导的图像翻译</b>，是一个卷积神经网络，能够将图片转换为各个域的\(style~code\)。在论文中，作者设置\(latent~code\)为一个长度为16的行向量，在推理时就是一个随机噪声；\(style~code\)是一个长度为64的行向量，因此映射网络与编码器的输出维度都是\([N_{domain},64]\)。
+                    <p class="text-center"><img src='raw/0012_2.png' width="750"></p>
+                    在训练时，<b>生成器的\(style~code\)都是由映射网络\(F\)产生的</b>；只有在\(image\)指导的推理时才用到编码器产生的\(style~code\)。对抗性损失如下，其中\(s=F_y(z)\)，\(z\)为随机噪声，其实就是\(latent~code\)：
+                    <p class="text-center"><img src='raw/0012_3.png' width="300"></p>
+                    编码器在训练时不参与生成图像，但是也要被更新参数。风格重构损失定义如下，这个损失同时也在保证生成器的结果时基于\(style~code\)的：
+                    <p class="text-center"><img src='raw/0012_4.png' width="300"></p>
+                    为了使结果更多样，得益于\(latent~code\)随机的特点，模型还增加了下面这个锦上添花的损失：
+                    <p class="text-center"><img src='raw/0012_5.png' width="300"></p>
+                    最后是\(unpaired\)模型必须要有的，保证内容的循环一致性损失：
+                    <p class="text-center"><img src='raw/0012_6.png' width="300"></p>
+                </p>
+                <h2>Experiments</h2>
+                <p>
+                    这篇文章的结果分析十分清楚，类似于\(Yolo~v2\)论文，<b>展示了改变各种结构后模型效果的变化</b>。下图中，\(A,B,C\)展示了\(StarGANv1\)加入各种技巧后的结果，此时模型还局限于条件\(GAN\)：一张输入只能得来一张输出；\(D\)是输入图像加入噪声后的结果，多样性有了，但是不够好，只有颜色的改变而没有结构的改变：例如发型没变化；引入映射网络之后，多样性显著提升，如图\(E\)；\(F\)是引入了之前提到的那个锦上添花的损失后的结果，可以看到多样性变强了一些。
+                    <p class="text-center"><img src='raw/0012_7.png' width="600"></p>
+                    论文还评估了生成图像的质量，例如\(FID,LPIPS\)指标。<b><em>寒假有空整理下这些评判标准的计算方式。</em></b>
+                </p>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                    <li><a href="https://arxiv.org/abs/1912.01865">这篇论文的地址</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
