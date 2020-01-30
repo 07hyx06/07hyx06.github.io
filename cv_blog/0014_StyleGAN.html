@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">A Style-Based Generator Architecture for Generative Adversarial Networks</h1>
+            <p class="lead blog-description">StyleGAN</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <h2>Notice</h2>
+                <p>
+                    \(PGGAN\)的效果已经很好了，可是研究人员并不满足，因为它有一个大问题就是<b>特征纠缠</b>。两个\(latent~code\)差别可能很小（体现在欧式距离上），但是生成的图片却千差万别。特征纠缠对\(PGGAN\)的应用造成了很大的阻碍，<b>而\(StyleGAN\)就是来解决特征纠缠问题的</b>！
+                </p>
+                <h2>From PGGAN to StyleGAN</h2>
+                <p>
+                    这一部分顺着这张表，来整理一下\(PGGAN\)是如何进化成为\(StyleGAN\)的。表中的数据是\(FID\)距离，<b>越小代表生成结果越好，衡量角度为图片质量与多样性</b>。
+                    <p class="text-center"><img src='raw/0014_1.png' width="600"></p>
+                    <ul>
+                        <li>
+                            模型\(A\)：原始\(PGGAN\)模型。
+                        </li>
+                        <li>
+                            模型\(B\)：我们来回顾一下\(PGGAN\)升采样是怎么做的：将\(1*1\)的块通过复制4份，直接变成\(2*2\)的块。<b>将这一操作改为双线性插值后，可以显著提升结果，同时不引入新的参数。</b>
+                        </li>
+                        <li>
+                            模型\(C\)：考虑一下\(PGGAN\)的输入，是一个从高斯分布随机产生的512维的\(latent~code\)（称其属于\(Z\)空间）。<b>\(StyleGAN\)选择将这一\(latent~code\)通过一个8层的\(MLP\)映射到\(W\)空间，再作为样式注入生成器</b>。这样做的好处是，可以让\(latent~code\)的分布更贴合训练数据集：
+                            <p class="text-center"><img src='raw/0014_2.png' width="500"></p>
+                            <b>假设上图中，横轴从右到左代表性别从男过度到女，纵轴从下到上代表头发从短到长，一个合理的事实是，训练集中有很多短发的男人，长发的女人与短发的女人，却没有长发的男人，但是在\(Z\)空间中，四者出现的概率均等。</b>这显然是不合理的，会影响生成图片质量，因此引入\(MLP\)映射到\(W\)空间是为了让\(latent~code\)的分布更贴合数据集。关于怎么将其注入生成器，下面的部分再解释。
+                        </li>
+                        <li>
+                            模型\(D\)：此时作者发现了一个意外的收获。在模型\(C\)的基础上，将生成器的输入改为一个常数向量，对最终图片质量的影响并不大。<b>因此决定将传统的输入层去掉，改为一个可以被训练的常数向量。</b>这样做是符合直觉的，因为低分辨率的网络层主要是学习一些轮廓特征的，而对于人脸数据集，轮廓差不多都是一个椭圆，可以视为一个常数。
+                        </li>
+                        <li>
+                            模型\(E\)：进一步增加多样性，对于生成器的每一个网络层，引入随机误差。
+                        </li>
+                        <li>
+                            模型\(F\)：训练时使用混合正则化的策略。此时模型进化为最终的\(StyleGAN\)。
+                        </li>
+                    </ul>
+                </p>
+                <h2>Method</h2>
+                <p>
+                    以上的这些改进，有一些并没有说清楚，例如：<b>\(W\)空间的\(latent~code\)是如何注入\(StyleGAN\)的？\(StyleGAN\)生成器的输入是什么？如何对生成器的每一个网络层注入随机误差？混合正则化策略是什么？</b>下面逐一解释清楚。
+                    <p class="text-center"><img src='raw/0014_3.png' width="750"></p>
+                    上图左侧\(a.Traditional\)就是我们熟知的\(PGGAN\)生成器，而右侧就是宏观上\(StyleGAN\)生成器的整个结构了。可以看到，\(StyleGAN\)生成器分为一个映射网络\(f\)与一个合成网络\(g\)。
+                    <br><br>
+                    映射网络\(f\)的输入是一个512维的高斯分布随机张量，输出仍然是一个512维的张量，记为\(style\)。接下来，我们需要将\(style\)注入合成网络\(g\)的不同阶段。<b>这个注入的过程就像一个目击证人向警察描述嫌疑人：注入生成网络的低分辨率层，相当于告诉警察凶手的高矮胖瘦；注入高分辨率层，就相当于描述眉毛，眼睛，脸上有没有痣这些细节，</b>警察在不断综合这些信息，最后画出了嫌疑人的肖像。
+                    <br><br>
+                    具体在模型中，是如何注入的呢？首先，将\(style\)复制成一个\([18,512]\)维度的张量（留意为什么是18？），然后单独训练18个单层\(MLP\)（图中的\(A\)块），将每个512维的张量映射成\([N_{channel},2]\)维的张量\([y_s,y_b]\)，通过\(AdaIN\)操作，将其与合成网络结合：
+                    <p class="text-center"><img src='raw/0014_4.png' width="300"></p>
+                    合成网络\(g\)是逐级提升图片分辨率。<b>从\(4*4\)到\(1024*1024\)，一共9种分辨率，每种分辨率使用2个卷积块，这就解释了为什么需要注入18次\(style\)</b>。关于随机噪声，是从高斯分布中产生一张单通道的噪声图，利用广播机制，直接与各分辨率的特征图做\(Pixelwise\)的加法。
+                    <br><br>
+                    到这里，先总结一下：<b>\(StyleGAN\)的输入只有\(Z\)空间随机产生的\(latent~code\)；真正影响到生成结果的，是\(W\)空间的\([18,512]\)维度的\(style\)张量；随机注入的误差只会轻微的影响结果。</b>真正解开特征纠缠的，是\(W\)空间的\(style\)张量。
+                </p>
+                <h2>Application</h2>
+                <p>
+                    如果\(style\)由映射网络\(f\)产生，那么这个\([18,512]\)的张量在每一维度上都必然是相等的，因为它是靠复制出来的。实际上，\(f\)与\(g\)是可以分开的。<b>我可以单独生成一个没必要每个维度都相等的\([18,512]\)维张量，直接当作\(style\)注入合成网络\(g\)，这样也是可以得到一张生成图片的。</b>再进一步，使用两个\(Z\)空间的随机张量，生成出两个\(W\)空间的\(style\)，将其融合，就可以得到融合的人脸了。下图展示了这样融合的结果：
+                    <p class="text-center"><img src='raw/0014_5.png' width="600"></p>
+                    训练时的混合正则化策略就是延续这个思路的。在训练时，通过\(W\)空间的\(style\)混合一些图片，可以使得模型具有更强的泛化能力。
+                </p>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                    <li><a href="https://arxiv.org/abs/1812.04948">这篇论文的地址</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
