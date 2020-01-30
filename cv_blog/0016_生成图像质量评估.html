@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">GAN生成图像质量评估</h1>
+            <p class="lead blog-description">Experiment必备</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <h2>AMT</h2>
+                <p>
+                    这个方法比较主观，早期的图像翻译模型（如\(CycleGAN~StarGAN\)）较多采用这种评估方法。有两种套路，都是挂在网上，让不同的人根据一些提出的指标选择图片，最后结果都会呈现出一个百分比：
+                    <ul>
+                        <li>
+                            \(Real~vs~Fake\)：例如\(CycleGAN\)生成的假斑马与真斑马图片摆在一起，选择主观认为真的图片。最终结果呈现为这个样子：
+                            <p class="text-center"><img src='raw/0016_1.png' width="600"></p>
+                        </li>
+                        <li>
+                            \(Fake~vs~Fake\)：一般用来是比较不同模型效果好坏的，同时呈现不同模型的结果，选择主观认为效果最好的那个，例如\(StarGAN~v1\)论文中：
+                            <p class="text-center"><img src='raw/0016_2.png' width="500"></p>
+                        </li>
+                    </ul>
+                </p>
+                <h2>Classification Acc</h2>
+                <p>
+                    \(StarGAN~v1\)论文中，在\(RaFD\)数据集上训练了一个识别各种表情的分类器。在评估时，用这个分类器在不同模型迁移结果上的分类误差来衡量质量，也算是比较合理。
+                    <p class="text-center"><img src='raw/0016_3.png' width="500"></p>
+                </p>
+                <h2>FCN Score</h2>
+                <p>
+                    如果是从语义分割图到真实图片的图像翻译模型，例如\(CycleGAN\)中的\(Cityspace\)数据集，自然可以反过来使用语义分割的准确度验证。
+                    <p class="text-center"><img src='raw/0016_4.png' width="500"></p>
+                </p>
+                <h2>FID</h2>
+                <p>
+                    \(FID\)距离是2018年提出的一个比较重要的指标，许多新模型都采用它来评判，例如\(StyleGAN\)等。计算\(FID\)距离需要使用一个预训练的\(Inception~v3\)模型，输入一张图片，得到最后一个池化层的激活向量（2048维）作为结果。在生成图片与真实图片上分别计算，各得到\(n\)个激活向量，再计算这2族生成向量的均值与协方差矩阵，代入公式就可以得到\(FID\)距离了：
+                    <p class="text-center"><img src='raw/0016_5.png' width="500"></p>
+                </p>
+                <h2>其它方法</h2>
+                <p>
+                    包括\(LPIPS\)，这在\(StarGAN~v2\)论文中被用来评估质量；\(Inception~Score\)，许多论文也在用，但不如\(FID\)科学，可能以后会被废弃；\(Multi~Scale~Statistical~Similarity\)是\(PGGAN\)论文中提到的一种评估方法，使用到了拉普拉斯金字塔，期望在多尺度计算\(Wasserstein\)距离，但目前没有看到别的论文在引用它。
+                </p>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+                <h4>参考</h4>
+                <p><a href='https://machinelearningmastery.com/how-to-implement-the-frechet-inception-distance-fid-from-scratch/'>FID距离参考</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
