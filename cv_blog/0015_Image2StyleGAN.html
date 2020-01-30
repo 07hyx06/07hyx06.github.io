@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">Image2StyleGAN: How to Embed Images Into the StyleGAN Latent Space?</h1>
+            <p class="lead blog-description">获取任意图片的latent code</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <h2>Notice</h2>
+                <p>
+                    \(StyleGAN\)效果虽好，每次产生的都是一张随机的脸。如果能够在让\(StyleGAN\)产生一张特定的人脸，应用就会更广泛了。<b>\(Image2StyleGAN\)就是通过图片反向找\(latent~code\)的一项技术。</b>这篇论文方法简单又十分有意思，看完后我忍不住立刻就复现了。在\(GTX1060\)上，还原一张图片大概需要20分钟。
+                </p>
+                <h2>Method</h2>
+                <p>
+                    通过图片反向找\(latent~code\)一般有两种思路：
+                    <ul>
+                        <li>
+                            训练一个\(Encoder\)将图片编码为\(latent~code\)，<b>这样可以做到实时推理</b>。
+                        </li>
+                        <li>
+                            训练\(latent~code\)，来找这张图片，<b>这样效果好但不能做到实时</b>。
+                        </li>
+                    </ul>
+                    \(Image2StyleGAN\)是基于第二种思路的一个模型。使用这种思路，就必然要面对2个问题：
+                    <ul>
+                        <li>
+                            如何选取\(latent~code\)：论文经过比较，发现在\(Z\)空间（512维张量），\(W\)空间（经过映射网络的512维张量）以及\(W^+\)空间（\([18,512]\)维的张量中，<b>\(W^+\)空间的效果明显优于剩下的二者。</b>这里需要说明一下，\(W^+\)空间的\([18,512]\)张量是不要求各个维度都相同的，不然就退化成了\(W\)空间。
+                        </li>
+                        <li>
+                            如何设计损失函数：一个简单的想法是计算生成图像与真实图像的\(MSE\)损失。在此基础上，作者提出借鉴了\(FastNeuralStyle\)中的感知机损失，即在\(VGG16\)的4个卷积层输出的\(feature~map\)上面计算\(MSE\)。总的优化目标为：
+                            <p class="text-center"><img src='raw/0015_1.png' width="450"></p>
+                            作者也做了实验，对比采取各种损失的训练结果。下图第一列是原始图像。<b>可以看到，如果不使用感知器损失，重构图像会比较模糊，缺少纹理特征，如下图第三列</b>。中间一列是采用所有损失后的重构结果，效果最好。
+                            <p class="text-center"><img src='raw/0015_2.png' width="500"></p>
+                        </li>
+                    </ul>
+                    总体算法描述如下图：
+                    <p class="text-center"><img src='raw/0015_3.png' width="500"></p>
+                </p>
+                <h2>Experiment</h2>
+                <p>
+                    上面的算法还是比较容易想到的，这篇论文的一大亮点是提出了一些应用以及一些有价值的讨论。<b>下面的所有结果都是建立在人脸数据集上预训练的\(StyleGAN\)上面的。</b>
+                    <ul>
+                        <li>
+                            在人脸数据集上预训练的\(StyleGAN\)可以重构出不同类别的图片：
+                            <p class="text-center"><img src='raw/0015_4.png' width="500"></p>
+                        </li>
+                        <li>
+                            利用\(W^+\)空间的\(latent~code\)，构造插值\(w=aw_1+(1-a)w_2\)，可以完成一些有意思的图像渐变工作：
+                            <p class="text-center"><img src='raw/0015_5.png' width="500"></p>
+                            这种方法对于人脸效果较好，但对于其他类别的迁移效果较差，过度图像会出现诡异的人脸：
+                            <p class="text-center"><img src='raw/0015_6.png' width="500"></p>
+                        </li>
+                        <li>
+                            注意到\(Image2StyleGAN\)可以将一些其他类别的图片嵌入到\(StyleGAN\)中，因此可以轻松的完成风格迁移任务。
+                            <p class="text-center"><img src='raw/0015_7.png' width="500"></p>
+                        </li>
+                        <li>
+                            表情迁移。\(w1,w2\)分别是同一个人笑与不笑的\(latent~code\)，那么通过\(w+a(w1-w2)\)可以将一个人的笑容迁移到另外一个人的脸上。这种做法类似于\(Word2Vec\)中，国王-男人+女人=皇后。
+                            <p class="text-center"><img src='raw/0015_8.png' width="500"></p>
+                        </li>
+                    </ul>
+                    最后是作者关于\(Image2StyleGAN\)算法初始化的一点讨论。<b>如果是重构人脸，作者建议采用\(W_+\)空间\(latent~code\)的平均值作为初值；如果是重构其它类别图像，则建议随机初始化。</b>
+                </p>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                    <li><a href="https://arxiv.org/abs/1904.03189v1">这篇论文的地址</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
