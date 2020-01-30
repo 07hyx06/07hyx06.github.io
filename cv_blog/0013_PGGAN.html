@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">Progressive Growing of GANs for Improved Quality, Stability, and Variation</h1>
+            <p class="lead blog-description">渐进的生成一张高清大图片</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <h2>Notice</h2>
+                <p>
+                    \(StyleGAN\)的论文初看感觉十分难懂，但\(latent~code\)又是一项十分重要的技术，毕竟生成的高清大图十分诱人，因此必须要啃下这块硬骨头。为了搞懂\(StyleGAN\)的论文，我认为也有必要了解一下它的前作\(PGGAN\)。<b>这篇笔记中会重点关注二者之间思路的关联与共性的技巧。</b>
+                </p>
+                <h2>Introduction</h2>
+                <p>
+                    \(PGGAN\)是一种\(unconditional~GAN\)，可以从零开始生成\(1024*1024\)分辨率的高清大图。传统\(GAN\)一般都是在小图片上面做实验，比如\(256*256\)分辨率，这就导致了\(GAN\)难以商业化。<b>生成大图片是一个具有挑战性的任务，不仅仅是收集一个高清数据集，把模型重跑一遍调调参数的问题。</b>对于生成器来说，生成一张大图比小图更容易出现瑕疵；对于判别器来说，从高分辨率的大图上也更容易看到瑕疵。这就导致了二者训练难度不平等的问题。
+                    <br><br>
+                    为了解决生成大图片的难题，作者提出了<b>渐进式训练</b>的思路：先在小图片上训练，然后同步加深网络层，提高分辨率。这个思路能\(work\)是有原因的。对于一般\(GAN\)生成器中的\(decoder\)，一些可视化技术（如\(GANDissection\)）表明，<b>在靠前的低分辨率的网络层，生成器主要生成轮廓，颜色等粗糙的特征，而在靠后的高分辨率的网络层，生成器会给图像添加细节。</b> 采用渐进式训练思路，可以让生成器在有了轮廓的基础上，去重点学习如何生成细节；而普通的生成器既要学习轮廓，又要学习添加细节。                
+                </p>
+                <h2>Method</h2>
+                <p>
+                    整个\(PGGAN\)的结构看下面这张图就很清楚了。随着分辨率的提高，网络变得越来越深；另一方面，随着像素的提高，可以看到生成图片是一个从轮廓到细节的过程。有了轮廓的保证，细节的学习变得更稳定。<b>实验还表明，\(PGGAN\)的训练速度比常规\(GAN\)更快，这是由于人工的拆解了训练过程，在学习轮廓等粗糙特征时，网络浅，参数少；在学习细节时，有了轮廓的保证，收敛更快</b>。
+                    <p class="text-center"><img src='raw/0013_1.png' width="750"></p>
+                    上图有一点没有说清楚，就是在提升分辨率时的操作细节。主要有下面两点：
+                    <ul>
+                        <li>
+                            采用一种\(fan-in\)策略，使得网络慢慢适应结构的改变。
+                        </li>
+                        <li>
+                            在增加网络深度后，所有之前的层依旧保持可以训练的状态。
+                        </li>
+                    </ul>
+                    具体来说，\(fan-in\)策略就是加了一条<b>起始于原分辨率特征图的通道</b>，这条通道占的权重随时间递减。下图展示了从\(16*16\)提升到\(32*32\)的训练过程。左图是原始分辨率\(16*16\)的网络结构，中图展示了这条额外的通道，右图表明在训练的最后额外通道的权重变为0。
+                    <p class="text-center"><img src='raw/0013_2.png' width="600"></p>
+                    最后再来介绍一下\(PGGAN\)训练的其它\(tricks\)，因为\(StyleGAN\)也继承了这些想法：
+                    <ul>
+                        <li>
+                            每层相等的\(lr\)：网络初始化统一采用\(N(0,1)\)。权重参与运算时需要统一乘上一个缩放因子，类似于\(He-Initialization\)的思路。<b>这是为了控制梯度更新的幅度。</b>
+                        </li>
+                        <li>
+                            \(Pixelwise\)正则化：对\(feature~map\)的每个像素，在通道的维度做归一化，其中\(N\)为通道数：
+                            <p class="text-center"><img src='raw/0013_3.png' width="250"></p>
+                            <b>这么做也是为了防止梯度更新过猛。还有一个额外的好处，将最终的输出卡在\([-1,1]\)的范围内。</b>另外，\(PGGAN\)没有使用任何\(BN,dropout\)层。
+                        </li>
+                        <li>
+                            激活函数：除了最后一层采用\(Linear\)（即直接输出），其它都是0.2的\(Leaky~ReLU\)。
+                        </li>
+                        <li>
+                            上采样：没有使用反卷积，而是直接把\(1*1\)的像素复制为\(2*2\)的像素块。<b>这样做不需要引入额外参数，并且在特定问题上面效果更好。</b>
+                        </li>
+                    </ul>
+                </p>
+        </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                    <li><a href="https://arxiv.org/abs/1710.10196?context=cs.LG">这篇论文的地址</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
