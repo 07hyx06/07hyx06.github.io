@@ -56,9 +56,17 @@
                     \(FID\)距离是2018年提出的一个比较重要的指标，许多新模型都采用它来评判，例如\(StyleGAN\)等。计算\(FID\)距离需要使用一个预训练的\(Inception~v3\)模型，输入一张图片，得到最后一个池化层的激活向量（2048维）作为结果。在生成图片与真实图片上分别计算，各得到\(n\)个激活向量，再计算这2族生成向量的均值与协方差矩阵，代入公式就可以得到\(FID\)距离了：
                     <p class="text-center"><img src='raw/0016_5.png' width="500"></p>
                 </p>
+                <h2>LPIPS</h2>
+                <p>
+                    一些经典的<b>评判图像之间区别</b>的指标有时会与人眼的直观相反。以欧式距离为例，一张高糊的图片可能和原始图像之间的距离很短，而一个有少数噪点的图像却与原始图像距离很大。其它指标也会遇到这种问题，见下图：
+                    <p class="text-center"><img src='raw/0016_6.png' width="750"></p>
+                    为了解决这个问题，\(LPIPS\)论文的作者收集了一个数据集，包含各种图像对之间人主观上的距离，并训练了一个简单的神经网络来拟合主观差别。神经网络的输入是\(VGG\)的中间激活层（这被广泛用于涉及到提取图像高维语义特征的任务中，例如\(neural~style\)），输出是一个距离值：
+                    <p class="text-center"><img src='raw/0016_7.png' width="750"></p>
+                    \(StarGAN~v2\)就采用这一指标来衡量结果。\(LPIPS\)越大，代表生成图像多样性越强。
+                </p>
                 <h2>其它方法</h2>
                 <p>
-                    包括\(LPIPS\)，这在\(StarGAN~v2\)论文中被用来评估质量；\(Inception~Score\)，许多论文也在用，但不如\(FID\)科学，可能以后会被废弃；\(Multi~Scale~Statistical~Similarity\)是\(PGGAN\)论文中提到的一种评估方法，使用到了拉普拉斯金字塔，期望在多尺度计算\(Wasserstein\)距离，但目前没有看到别的论文在引用它。
+                    例如\(Inception~Score\)，许多论文也在用，但不如\(FID\)科学，可能以后会被废弃；\(Multi~Scale~Statistical~Similarity\)是\(PGGAN\)论文中提到的一种评估方法，使用到了拉普拉斯金字塔，期望在多尺度计算\(Wasserstein\)距离，但目前没有看到别的论文在引用它。
                 </p>
             </div>
         <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
