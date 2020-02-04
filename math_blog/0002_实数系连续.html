@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">实数系连续性的等价表述</h1>
+            <p class="lead blog-description">思维游戏，同时也是基础</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <p>
+                    <b>什么是实数系的连续性？</b>要回答这个问题，需要从数系的扩充开始讲起：
+                    <ul>
+                        <li>
+                            自然数系：是人类认识的第一个数系，虽然用来计数是足够用了。自然数系只能自由的进行加，乘运算，但是不能自由的进行加，乘的逆运算。<b>自然数系既不完备，也不连续。</b>
+                        </li>
+                        <li>
+                            整数系：对自然数系引入负数，这样就可以自由的进行加，减，乘运算，但是除法依旧不可以自由进行。同样，<b>整数系既不完备，也不连续。</b>
+                        </li>
+                        <li>
+                            有理数系：对整数系中任意两个数做加，减，乘，除运算得到的数的全体即为有理数系。显然，<b>有理数系是完备的，但它不是连续的</b>，因为还有\(\sqrt{2}\)这种数没有被纳入。
+                        </li>
+                        <li>
+                            实数系：填补有理数系留在数轴上的空隙后，得到了实数系。怎么填补呢，<b>这就归结到了如何定义无理数的问题上。</b>
+                        </li>
+                    </ul>
+                    在19世纪下半叶，这一历史任务被戴德金，康托等人完成。下面介绍<b>戴德金构造无理数</b>的方法：
+                    <br><br>
+                    将所有有理数打印到数轴上面，然后对着数轴扎一根针，针左侧的有理数构成的集合记为\(A\)，针右侧的有理数构成的集合记为\(B\)（如果针扎到了一个数，那么这个数归于右侧），<b>这样\((A|B)\)构成了\(\mathbb Q\)的一个分划</b>。显然集合\(A\)是没有最大数的。如果集合\(B\)有最小数，则记\((A|B)\)为有理分划，否则记为无理分划。<b>显然有理分划与有理数一一对应，因此无理数就自然被定义成了无理分划。</b>有理分划与无理分划构成的集合就是实数系\(\mathbb R\)。
+                    <br><br>
+                    实数系连续性拥有了第一个表述，即<b>戴德金分割定理：对\(\mathbb R\)的任意分划\((A|B)\)，\(B\)中有最小数。</b>换句话说，我们不可能通过\(\mathbb R\)进行分划产生新数了，\(\mathbb R\)已经将数轴填满了。
+                    <br><br>
+                    戴德金分割定理十分基础，<b>但在证明过程中并不好用，因此需要寻找其等价表述</b>。这就引出了下面的7大定理，并且每条定理都可以由它上面的定理推出。
+                    <br><br>
+                    <b>1. 确界存在定理：非空有上界的实数集必有上确界，非空有下界的实数集必有下确界。</b>
+                    <br><br>
+                    在证明之前，需要明白确界的定义是什么。设\(M\)为实数集\(E\)的上确界，首先<b>确界是个上界，需要满足上界的定义</b>：\(\forall x \in E,x \leq M\)；第二点，<b>确界是最小的上界，也就是说任何比确界小的数都不是上界</b>，所以要满足：\(\forall \epsilon \gt 0,\exists x'\in E,\mathrm{ s.t. }x'\gt M-\epsilon\)。下确界的定义同理。
+                    <br><br>
+                    证明<b>确界存在定理</b>：设\(B:\{E的所有上界构成的集合\},A=\mathbb R-B\)。因为\(E\)有上界，所以\(B\)非空；因为\(E\)非空，所以\(A\)也非空。故\((A|B)\)构成\(\mathbb R\)的一个分划，由戴德金分割定理知\(B\)必有最小数。<b>确界存在性得证。</b>
+                    <br><br>
+                    <b>2. 单调收敛原理：单调有界数列必有极限。</b>
+                    <br><br>
+                    证明<b>单调收敛原理</b>：不妨设数列单调上升。设\(E=\{a_1,a_2,...,a_n,...\}\)，数列有界所以\(E\)也有界。由确界存在定理，\(E\)有上确界。<b>结合数列单增与确界定义的第二点易证</b>。
+                    <br><br>
+                    <b>3. 闭区间套定理：设\(\{[a_n,b_n]\}\)是一闭区间列，并满足<br>
+                        \((1)~[a_{n+1},b_{n+1}]\subseteq [a_n,b_n],~n=1,2,3,...\)<br>
+                        \((2)~\lim\limits_{n\rightarrow\infty}(b_n-a_n)=0\)<br>
+                        则存在唯一的点\(c\in\mathbb R\)，使得\(c\in[a_n,b_n],~n=1,2,3,...\)。
+                    </b>
+                    <br><br>
+                    证明<b>闭区间套定理</b>：由第一个条件知数列\(a_n\)单增有上界\(b_1\)，数列\(b_n\)单减有下界\(a_1\)，所以根据单调收敛原理，\(a_n,b_n\)都有极限；由第二个条件与极限的四则运算，知两个极限相等。故得证。
+                    <br><br>
+                    <b>4. 有限开覆盖定理：</b>设\([a,b]\)是一个闭区间，\(\{E_\lambda\}\)是\([a,b]\)的任意一个开覆盖，在\(\{E_\lambda\}\)中必存在有限个开区间\(E_1,E_2,...,E_N\)使得\([a,b]\in \bigcup E_n\)。
+                    <br><br>
+                    证明<b>有限开覆盖定理</b>：采用反证法，若不然，二分闭区间后必有一边不能被有限开覆盖。每次二分后都取不能被有限开覆盖的闭区间，这样这些区间就构成了一个区间列。根据闭区间套定理，最后区间收敛到一个点\(c\)上面。由区间列的性质知\(c\)不能被有限覆盖，矛盾。故得证。
+                    <br><br>
+                    <b>5. 聚点原理</b>：\(\mathbb R\)中任何一个有界无穷子集至少有一个聚点。
+                    <br><br>
+                    聚点的定义为：\(x_0\)是集合\(E\)的聚点，等价于\(x_0\)的任何邻域都有\(E\)中无穷多个点。<b>例如，上确界就是一个聚点。</b>
+                    <br><br>
+                    证明<b>聚点原理</b>：构造开覆盖\(\{U(x,\delta):x\in[a,b]\}\)，由有限开覆盖定理，知存在有限个开区间\(U(x_j,\delta),~j=1,2,...,n\)，它们的并集能够包含\([a,b]\)。有限个区间包含了\([a,b]\)无穷多个点，所以必至少有一个开区间内含有\([a,b]\)中无穷多个点。这个开区间的中心点即为聚点，得证。
+                    <br><br>
+                    <b>6. 维尔斯特拉斯定理</b>：任何有界序列必有收敛子列。
+                    <br><br>
+                    证明<b>维尔斯特拉斯定理</b>：设\(E=\{a_1,a_2,...,a_n,...\}\)，由聚点原理，设\(a\)为\(E\)的一个聚点。构造子列，取\(x_{n_k}\in U(a,\frac{1}{2^k})\bigcap\{x_{n_k+1},x_{n_k+1},...\}\)，由聚点定义知这样的\(x_{n_k}\)一定存在。容易验证\(x_{n_k}\)收敛于\(a\)。
+                    <br><br>
+                    <b>7. 柯西收敛准则</b>：序列\(\{x_n\}\)收敛的充要条件是它是一个柯西列。
+                    <br><br>
+                    柯西列的定义：\(\forall\epsilon\gt0,\exists N,当n,m\gt N,|x_n-x_m|\lt \epsilon恒成立\)。
+                    <br><br>
+                    证明<b>柯西收敛准则</b>：必要性由极限定义易证。证明充分性时，先证柯西列有界，再由维尔斯特拉斯定理取一个收敛子列作为抓手，可以轻松证明。
+                </p>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
