@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">三角剖分01：对多边形的三角剖分</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <h2>直观的定义</h2>
+                <p>
+                    三角剖分可以划分为两类问题，<b>一类是对多边形的三角剖分，另一类是对点云的三角剖分。</b>分别如下图所示：
+                    <p class="text-center">
+                        <img src='raw/0004_2.png' height="200">
+                        <img src='raw/0004_1.png' height="200">
+                    </p>
+                    在介绍三角剖分之前，先来引入一个著名的算法问题。
+                </p>
+                <h2>Art Gallery Problem</h2>
+                <p>
+                    一个艺术博物馆，最少需要安装多少个摄像头，才能监控到馆内的每一处？其中每个摄像头的视角都是360°的，但是不能穿墙。例如，下图中的艺术博物馆就需要最少2个摄像头：
+                    <p class="text-center"><img src='raw/0004_3.png' width="600"></p>
+                    \(Art~Gallery~Problem\)在历史上已经被证明为是一个\(NP~hard\)问题，所以我们退一步，考虑另外一个问题：<b>对于任意的\(n\)边形艺术博物馆，最多需要安装多少个摄像头才能监控到每一处？</b>事实上，可以证明最多只需要安装\(\lfloor \frac{n}{3}\rfloor\)个摄像头即可。
+                    <br><br>
+                    要证明这个结论，需要从两方面考虑。<b>第一：对于任何\(n\)，给出需要安装\(\lfloor \frac{n}{3}\rfloor\)个摄像头的构造；第二：证明\(\lfloor \frac{n}{3}\rfloor\)可以满足任何\(n\)边形。</b>第一点比较简单，构造一个梳子形状的多边形即可：
+                    <p class="text-center"><img src='raw/0004_4.png' width="600"></p>
+                    对于第二点的证明，需要三角剖分的辅助。<b>如果一个\(n\)边形中间没有洞，那么它经过三角剖分后得到的新图（下面的左图）的对偶图（下面的中图）一定是一棵树；</b>如果有空洞，那么围绕每个空洞都会形成环（下面的右图）：
+                    <p class="text-center">
+                        <img src='raw/0004_5.png' height="250">
+                        <img src='raw/0004_6.png' height="250">
+                        <img src='raw/0004_7.png' height="250">
+                    </p>
+                    此时可以沿着这棵树对多边形的顶点进行3染色，<b>染色的规则是：有边相连的顶点不能同色。</b>经过染色后，不难看出每个三角形的顶点都会染上不同的颜色。设分别有\(R,G,B\)个点染上了红，绿，蓝色，那么有\(R+G+B=n\)。<b>由抽屉原理，必有一种颜色的点数目不多于\(\lfloor \frac{n}{3}\rfloor\)，不妨设为红色</b>。那么只需要在被染成红色的顶点处安装摄像头即可监测到整个博物馆。
+                </p>
+                <h2>三角剖分的存在性</h2>
+                <p>
+                    上面的证明是基于三角剖分的，但是我们还不知道对于任意的多边形，它的三角剖分是否存在。<b>实际上，即便有空洞，简单多边形的三角剖分也是存在的。</b>简单多边形指的是，它的不连续的边都是不相交的，例如下面的左图就是简单多边形，而剩下的两个都不是：
+                    <p class="text-center"><img src='raw/0004_8.png' width="600"></p>
+                    下面就使用归纳法来证明三角剖分的存在性。首先，来定义一种多边形的归纳序，我们称多边形\(A\)小于多边形\(B\)，当且仅当：
+                    <ol>
+                        <li>
+                            多边形\(A\)的空洞数量少于多边形\(B\)的空洞数量；
+                        </li>
+                        <li>
+                            如果二者空洞数量相同，多边形\(A\)的顶点数少于多边形\(B\)的顶点数。
+                        </li>
+                    </ol>
+                    在这种序的定义下，下图的多边形从左至右递增：
+                    <p class="text-center"><img src='raw/0004_9.png' width="750"></p>
+                    有了序的定义，就可以做出归纳假设了：<b>假设所有小于它的多边形都可以三角剖分</b>。按照归纳法，我们接下来的工作就是把一个多边形分为几个小于它的多边形的组合。
+                    <br><br>
+                    首先找到多边形的一个凸角顶点，可以采用凸包算法中\(Lowest-Then-Leftmost\)的思路，最左下的点一定张的是凸角。设这个点为\(J\)点，它的前驱后继分别为\(I,K\)点。这时候就出现了两种情况：
+                    <ol>
+                        <li>
+                            三角形\(IJK\)在多边形内部（如下图），<b>此时沿着\(IK\)切一刀，\(n\)边形就会被分解为一个三角形与一个\((n-1)\)边形，由归纳假设得证</b>。
+                            <p class="text-center"><img src='raw/0004_10.png' width="250"></p>
+                        </li>
+                        <li>
+                            三角形\(IJK\)由部分在多边形外部（如下图），也就是说，有一些多边形的顶点落在\(IJK\)内部，此时取距离\(IK\)最远的内部顶点\(M\)，沿着\(JM\)切一刀，会发现多边形要么少一个顶点（下面的左图），要么少了一个洞（下面的右图）。<b>总之，切完后多边形变小了，由归纳假设得证。</b>
+                            <p class="text-center"><img src='raw/0004_11.jpg' width="500"></p>
+                        </li>
+                    </ol>
+                    综合以上讨论，由数学归纳法原理，得证！
+                </p>
+                <h2>三角剖分的性质</h2>
+                <p>
+                    <ol>
+                        <li>
+                            <b>三角剖分不唯一</b>。很显然，一个正方形的两条对角线可以构成两种不同的三角剖分。
+                        </li>
+                        <li>
+                            <b>一个\(n\)变形可以被分解成\(n-2\)个三角形</b>。多边形内角和为\((n-2)\pi\)，而每个三角形的内角和为\(\pi\)，故可分解为\(n-2\)个三角形。
+                        </li>
+                        <li>
+                            <b>一个\(n\)变形经过三角剖分后，产生了\(n-3\)条内对角线</b>。设经过三角剖分后，有\(k\)条内对角线，每条内对角线被两个三角形公用。对剖分图的边数算两次，有方程：
+                            <p class="text-center">\(2k+n=3(n-2)\)</p>
+                            解得\(k=n-3\)。即产生了\(n-3\)条内对角线。
+                        </li>
+                        <li>
+                            <b>多边形中如果不带洞，那么它的三角剖分图的对偶图是一棵树；如果原来带有洞，那么就必然有环路。</b>
+                        </li>
+                    </ol>
+                </p>
+                <h2>单调多边形的三角剖分算法</h2>
+                <p>
+                    先来处理一个简单的情况。<b>如果多边形是单调的，那么可以在\(o(n)\)的时间内求出三角剖分。</b>
+                    <br><br>
+                    什么是单调多边形？首先定义单调多边形链：一个点链是单调的，当且仅当存在一个特定的方向，使得点链在此方向上的投影有序。例如下图：
+                    <p class="text-center"><img src='raw/0004_12.png' width="750"></p>
+                    <b>如果一个多边形是单调的，当且仅当它可以被分解成两条互补的沿着同一方向单调的多边形链</b>。方便起见，下面的讨论中不妨设单调方向为纵向，并将两条链称为左侧链（下图蓝色链）和右侧链（下图橙色链），这两条链在最低点和最高点重合构成多边形。
+                    <p class="text-center"><img src='raw/0004_13.png' width="250"></p>
+                    在做三角剖分时，需要先对两条链按照\(y\)轴排序。这一步花费\(o(n)\)的时间复杂度，因为两条链原本内部有序，只需要做归并即可。于是得到了下面的图：
+                    <p class="text-center"><img src='raw/0004_14.png' width="250"></p>
+                    将最高的两个顶点入栈\(S\)，与凸包算法一样，这个栈也需要始终保持至少有2个元素。之后开始从上到下扫描，每次弹出栈顶的2个元素\(s,t\)，与新的点\(c\)做\(To-Left\)测试，会遇到两种情况：
+                    <ol>
+                        <li>
+                            如果\(c\)点位于\(st\)右侧，将\(s,t,c\)依次推入栈中，<b>扫描线下移</b>；
+                            <p class="text-center"><img src='raw/0004_15.jpg' width="400"></p>
+                        </li>
+                        <li>
+                            如果\(c\)点位于\(st\)左侧，此时\(stc\)可以形成一个位于多边形内部的三角形，记录\(stc\)为一个剖分三角形，再将\(s\)推入栈中，<b>扫描线不动</b>。此时需要注意，如果\(c\)点与\(s,t\)点不在一条链上，算法会一直弹直到栈底，此时需要弹出老的栈底\(b\)，推入\(c,t\)做为新栈底，保证栈\(S\)至少有2个元素（如下面的右图），<b>再下移扫描线</b>。
+                            <p class="text-center">
+                                <img src='raw/0004_16.png' height="250">
+                                <img src='raw/0004_17.png' height="250">
+                            </p>
+                        </li>
+                    </ol>
+                    上述扫描线算法持续到产生了\(n-2\)个剖分三角形后停止。容易验证时间复杂度为\(o(n)\)。
+                </p>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
