@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">黎曼可积性及其等价表述</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                
+                    在高数书上面，通常会默认见到的定积分全部都是可积的。严格上并不是这样，关于什么样的函数可积，有一套完整，严谨的理论。
+                    <br><br>
+                    在学过微积分后，我们知道，<b>定积分的计算就是一个分割-求和-取极限的过程</b>。不禁发问，对于任意的分割，求和方式，取极限后的结果是否都相等？先来看第一个例子，著名的<b>迪利克雷函数</b>：
+                    <p class="text-center">\(f(x)=1,x\in\mathbb Q;~f(x)=0,x\notin\mathbb Q\)</p>
+                    在\([0,1]\)区间做\(n\)等分，考虑两种不同的求和方式：第一种，<b>选取小区间上无理点为求和点</b>，这样取极限后积分值为0；第二种，<b>选取小区间上有理点为求和点</b>，这样取极限后积分值为1。
+                    <br><br>
+                    如果认为迪利克雷函数是可积的，那就乱套了，因为说不清它的积分值到底是0还是1。为了避免这种情况发生，在计算定积分之前，还是有必要研究一下可积性的。
+                    <img src='raw/分割线_蜡笔.jpg' width="750">
+                    <br><br>
+                    下面就给出<b>黎曼可积</b>的定义：如果一个函数\(f\)在区间\([a,b]\)黎曼可积，当且仅当对于区间\([a,b]\)上任意的划分\(P:a=x_0\lt ... \lt x_n=b\)，记\(\lambda=\max\limits_i (\Delta x_i),~i=1,...,n\)，对任意的取点方式\(\xi_i\in[x_i,x_{i+1}]\)，都有：
+                    \(\lim\limits_{\lambda\rightarrow 0}\sum\limits_i f(\xi_i)\Delta x_i =I\)，则\(f\)在区间\([a,b]\)可积，且积分值等于\(I\)。其中，\(\sum\limits_i f(\xi_i)\Delta x_i\)就是黎曼和。
+                    <br><br>
+                    翻译成人话，对于任何的划分，只要足够密（就是\(\lambda\rightarrow 0\)），再从每个划分小区间中任意取分点，黎曼和的极限都是同一个值\(I\)，则函数在区间黎曼可积，并且积分值就是\(I\)了。<b>在这样的定义下，显然迪利克雷函数不是黎曼可积的。此外，无界函数也是不可积的。所以下面的一切讨论都建立在有界函数上面。</b>
+                    <img src='raw/分割线_兔子.jpg' width="750">
+                    <br><br>
+                    如果给你丢一个别的函数，让你判断它是不是黎曼可积的，只用定义是十分不方便的。例如下面这个<b>黎曼函数</b>，在自变量为有理数时，函数取值为分母的倒数，自变量为无理数时函数值为0：
+                    <p class="text-center">\(f(x)=\frac{1}{p},x=\frac{q}{p};~f(x)=0,x\notin\mathbb Q\)</p>
+                    有了黎曼可积的定义，与前面迪利克雷函数的铺垫，我们也试图采用同样的方法。考虑两种不同的求和方式：第一种，<b>选取小区间上无理点为求和点</b>，这样取极限后积分值为0；第二种，<b>选取小区间上有理点为求和点</b>，这样取极限后积分值为什么？<b>不出意外的卡在这里了，我们需要更好的判定方法才能解决这个问题。</b>
+                    <img src='raw/分割线_蜡笔.jpg' width="750">
+                    <br><br>
+                    <b>下面就来找一些更好的（使用起来更方便的）黎曼可积等价条件。</b>我们先从取分点入手。定义告诉我们如果一个函数可积，那么在区间上取任意分点，黎曼和的极限都应该相等。任意的分点情况太复杂，对于划分\(P\)，很自然的想到两种情况：
+                    <ul>
+                        <li>
+                            第一种：在每个小区间上都取函数值的<b>上确界</b>\(M_i\)，这样得到的黎曼和记为达布大和\(\overline S(P)\)。
+                        </li>
+                        <li>
+                            第二种：在每个小区间上都取函数值的<b>下确界</b>\(m_i\)，这样得到的黎曼和记为达布小和\(\underline S(P)\)。
+                        </li>
+                    </ul>
+                    达布大和与达布小和有如下的性质：
+                    <ol>
+                        <li>
+                            对于同一个划分\(P\)，一定有\(\overline S(P)\geq\underline S(P)\)。
+                        </li>
+                        <li>
+                            在划分\(P\)的基础上再增加分点得到\(P'\)，则有大和不增\(\overline S(P)\geq\overline S(P')\)，小和不减\(\underline S(P)\leq\underline S(P')\)。
+                        </li>
+                        <li>
+                            对于任意的两个划分\(P_1,P_2\)，达布大和总比达布小和大，即\(\overline S(P_1)\geq\underline S(P_2)\)。性质3的证明需要构造中间量，考虑\(P_1,P_2\)两个划分的并集\(P\)，然后由前面的性质，有：
+                            <p class="text-center">\(\overline S(P_1)\geq\overline S(P)\geq\underline S(P)\geq\underline S(P_2)\)</p>
+                            <b>这种构造分划并集的技巧在可积性的证明里十分常见。</b>
+                        </li>
+                        <li>
+                            记\(L=\sup\{\overline S(P)|对任意划分P\},l=\inf\{\underline S(P)|对任意划分P\}\)，有\(L\geq l\)。
+                        </li>
+                    </ol>
+                    <b>第一个重要的观察：</b>如果达布大和的极限与达布小和的极限对于任意的划分都等于\(I\)，那么由夹逼定理，黎曼和的极限一定存在，并且就是\(I\)。<b>第二个重要的观察：</b>上述列举的达布大和性质不禁让人联想到一个单调下降的数列，我们会猜想，\(L\)是否就是当\(\lambda\rightarrow 0\)后达布大和的极限。<b>结合两个观察，如果能够证明\(\lim\limits_{\lambda\rightarrow 0}\overline S(P)=L,~\lim\limits_{\lambda\rightarrow 0}\underline S(P)=l\)，那么黎曼可积就等价于\(L=l\)了。</b>
+                    <img src='raw/分割线_兔子.jpg' width="750">
+                    <br><br>
+                    实际上，<b>达布定理</b>说的就是这件事。记\(L\)为达布大和的下确界，\(l\)为达布小和的上确界，有：<p class="text-center">\(\lim\limits_{\lambda\rightarrow 0}\overline S(P)=L,~\lim\limits_{\lambda\rightarrow 0}\underline S(P)=l\)</p>
+                    在证明达布定理前，我们先对上面的性质2做更细致的讨论：设划分\(P\)一共有\(N\)个小区间，\(P\)中的最大小区间长度为\(\lambda\)，函数\(f\)在区间\([a,b]\)的上下确界分别为\(M,m\)，那么有：
+                    <p class="text-center">\(\overline S(P)-\overline S(P')\leq N(M-m)\lambda\)</p>
+                    有了这一步准备，就可以来证明达布定理了。由上确界定义，\(\forall \epsilon\gt 0,\exists P,~s.t.L-\epsilon\lt\overline S(P)\lt L\)，设划分\(P\)共有\(N\)个子区间。对于任意\(P^*\)，记\(P^*\)与\(P\)的并为\(P'\)，则有：
+                    <p class="text-center">\(\overline S(P^*)-L=(\overline S(P^*)-\overline S(P'))+(\overline S(P')-\overline S(P))+(\overline S(P)-L)\)</p>
+                    <b>上式三项中，第二项为负，第三项可控，重点在于第一项。此时令划分\(P^*\)的最大小区间长度不超过\(\frac{\epsilon}{N(M-m)}\)，第一项也可被控制在\(\epsilon\)。综上得证。</b>
+                    <br><br>
+                    达布定理的证明过程还告诉了我们另外一件事：如果存在一个分划\(P\)，使得\(L-\epsilon\lt\overline S(P)\lt L\)，我们可以基于\(P\)，构造出无穷多的分划满足这个性质。<b>这个推论十分重要，后面还会用到。</b>
+                    <img src='raw/分割线_兔子.jpg' width="750">
+                    <br><br>
+                    有了达布定理的保证，我们就得到了<b>黎曼可积的第一个等价条件：黎曼可积等价于\(L=l\)。</b>
+                    <br><br>
+                    在第一个条件基础上，可以直接推出<b>第二个等价条件</b>：记\(w_i=M_i-m_i\)，如果
+                    <p class="text-center">\(\lim\limits_{\lambda\rightarrow 0}\sum\limits_i w_i\Delta x_i =0\)</p>
+                    则函数在区间黎曼可积。上面出现的\(w_i\)几何意义就是函数在每个小区间上的振幅。
+                    <br><br>
+                    使用第二个等价条件可以推出<b>两个黎曼可积的充分条件</b>：单调函数必可积；连续函数必可积。
+                    <br><br>
+                    更进一步，结合第二个等价条件，与达布定理证明最后的推论，可以得到<b>第三个等价条件</b>：\(\forall \epsilon\gt 0\)，若存在划分\(P\)满足\(\sum\limits_i w_i\Delta x_i \lt\epsilon\)，则函数在区间黎曼可积。
+                    <br><br>
+                    第三个等价条件在使用起来是非常方便的，因为要判断一个函数是否可积，<b>只要找到一个划分满足条件即可，而不需要验证任意的划分</b>。使用第三个条件，可以非常方便的证明<b>黎曼函数黎曼可积</b>。
+                </p>                
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
