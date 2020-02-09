@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">信息熵02：联合熵，条件熵与共识</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                在上一节中，通过数学推导，得出了信息熵的唯一可能形式为：
+                \(H(X)=-\sum\limits_{x\in X}p(x)\log p(x)\)；写成期望形式后，\(H(X)=\mathbb E[-\log p(X)]\)。通过建立直观，可以很容易的想清楚信息熵的两条重要性质：
+                <ul>
+                    <li>
+                        \(H(X)=0\)当且仅当在\(X\)的某个点\(x\)上面，\(p(x)=1\)。<b>因为确定事件的不确定性是0。</b>
+                    </li>
+                    <li>
+                        \(H(X)\)取最大值时，所有\(p(x)\)都相等。<b>如果一个人告诉你，明天的聚会他有50%的可能来，50%的可能不来，那你对他明天来不来的不确定性是最大的，所以信息量也是最大的。</b>
+                    </li>
+                </ul>
+                <img src="raw/分割线_蜡笔.jpg" width="750">
+                <br><br>
+                <h2>联合熵与条件熵</h2>
+                在信息论中，还会遇到下面两种熵：
+                <ul>
+                    <li>
+                        联合熵：\(H(X,Y)=-\sum\limits_{x,y}p(x,y)\log p(x,y)\)，又可以写作\(H(X,Y)=\mathbb E[-\log p(X,Y)]\)。<b>代表两件事情总体的信息量</b>。
+                    </li>
+                    <li>
+                        条件熵：\(H(Y|X)=-\sum\limits_{x,y}p(x,y)\log p(y|x)\)，又可以写作\(H(Y|X)=\mathbb E[-\log p(Y|X)]\)。<b>代表在一个事件发生的情况下，另一个事件的信息量。</b>
+                    </li>
+                </ul>
+                关于条件熵，需要特别注意求和项里面是\(p(x,y)\log p(y|x)\)，而非\(p(y|x)\log p(y|x)\)。事实上，有：
+                <p class="text-center">
+                    \(H(Y|X)=-\sum\limits_{x,y}p(x,y)\log p(y|x)=-\sum\limits_x\sum\limits_y
+                    p(y|x)\log p(y|x)=-\sum\limits_x H(Y|X=x)\)
+                </p>
+                上式的实际意义也是显然的：<b>条件熵可以分解为在不同观测点上的条件熵的求和</b>。对多个事件的条件熵同理也可以分解成下面的形式：
+                <p class="text-center">\(H(Y|X,Z)=-\sum\limits_{z}H(Y|X,Z=z)\)</p>
+               <b>使用期望形式与条件概率公式</b>可以轻易证明，联合熵与条件熵具有下面的关系式：
+                <p class="text-center">
+                    \(H(X,Y)=H(X)+H(Y|X)=H(Y)+H(X|Y)\)
+                </p>
+
+                <img src="raw/分割线_兔子.jpg" width="750">
+                <br><br>
+                <h2>共识</h2>
+                <b>共识，代表两个事件共有的信息量</b>，定义为：\(I(X;Y)=\sum\limits_{x,y}-p(x,y)\log\frac{p(x,y)}{p(x)p(y)}\)；写成期望形式后，共识\(I(X;Y)=\mathbb E[-\log\frac{p(X,Y)}{p(X)p(Y)}]\)。使用期望形式，可以轻松证明：
+                <p class="text-center">\(I(X;Y)=H(X)-H(X|Y)=H(Y)-H(Y|X)=H(X)+H(Y)-H(X,Y)\)</p>
+                下图展示了联合熵，条件熵与共识三者的关系：
+                <p class="text-center"><img src="raw/0005_1.jpg" width="400"></p>
+                从图中，我们还得知一定有\(H(X|Y)\leq H(X)\)。<b>也就是说，一件事情发生后，另一件事情的信息量一定会减小，因为二者可能携带共同的信息。</b>共识还是关于\(X,Y\)对称的。
+                <br><br>
+                我们还可以定义条件共识：
+                <p class="text-center">
+                    \(I(X;Y|Z)=\sum\limits_{x,y,z}-p(x,y,z)\log\frac{p(x,y|z)}{p(x|z)p(y|z)}=\mathbb E[-\log\frac{p(X,Y|Z)}{p(X|Z)p(Y|Z)}]\)
+                </p>
+                不难证明所有关于共识的性质对于条件共识都是成立的，<b>因为条件熵与条件概率的本质都是替换了总的样本空间或观测空间。</b>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

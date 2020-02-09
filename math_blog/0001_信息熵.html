@@ -21,8 +21,7 @@
 	<br>
     <div class="container">
         <div class="blog-header">
-            <h1 class="blog-title">Self Information and Entropy</h1>
-            <p class="lead blog-description">信息熵的定义及性质推导</p>
+            <h1 class="blog-title">信息熵01：信息量化</h1>
         </div>
 
         <div class="row">
@@ -84,42 +83,7 @@
                     <p class="text-center">
                         \(H(X)=\mathbb{E}[I(X)]=\sum\limits_{x\in X}P_X(x)\log{\frac{1}{P_X(x)}}\)
                     </p>
-                    在工程中，信息一般由01组成的二进制串编码，因此约定熵中\(\log\)的底数为2。不难看出，<b>熵永远是非负的，</b>当且仅当\(P_X(x)=1\)时\(H(X)=0\)。直观上也很好理解，当\(X\)为必然事件时，事件没有了不确定性，熵自然就是0了。第二点，<b>当\(P_X(x)\)服从均匀分布时，熵最大</b>。这一点同样很好理解，如果一个人告诉你，明天的聚会他有50%的可能来，50%的可能来，你是最懵的；如果他说有70%的可能来，30%的可能不来，那你得到的信息是他来的可能性大一点。<br><br>
-                    <b>随机向量\((X,Y)\)的联合熵定义为</b>：
-                    <p class="text-center">
-                        \(H(X,Y)=\sum\limits_{(x,y)\in (X,Y)}P_{X,Y}(x,y)\log{\frac{1}{P_{X,Y}(x,y)}}\)
-                    </p>
-                    <b>随机变量\(X,Y\)的条件熵定义为</b>：
-                    <p class="text-center">
-                        \(H(Y|X)=\sum\limits_{x\in X}P_X(x)(\sum\limits_{y\in Y}P_{Y|X}(y|x)\log{\frac{1}{P_{Y|X}(y|x)}})\)
-                    </p><br>
-                    熵与条件熵，联合熵之间满足性质1称为<b>链式法则</b>：
-                    <p class="text-center">
-                        \(H(X,Y)=H(X)+H(Y|X)\)<br>
-                        \(H(X_1,X_2,...,X_n)=\sum\limits_i H(X_i|X_1...X_{i-1})\)
-                    </p>
-                    上面这个性质可以由公理3与条件概率性质\(P_{X,Y}(x,y)=P_{X}(x)P_{Y|X}(y|x)\)证明。<br><br>
-                    此外，熵还满足性质2：\(H(X)\geq H(X|Y)\)。这条性质在直观上同样很好理解：得知了事件\(Y\)后，事件\(X\)的不确定性会下降，反应为熵减少。等号成立当且仅当\(X,Y\)两事件独立。综合上面的两条性质，如果\(X,Y\)独立，那么就有：\(H(X,Y)=H(X)+H(Y)\).
-                </p>
-                <h2>共识</h2>
-                <p>
-                    共识在信息传递中起到十分重要的作用。<b>定义为两个事件的共同信息</b>：
-                    <p class="text-center">
-                        \(I(X;Y)=H(X)+H(Y)-H(X,Y)\)
-                    </p>
-                    共识有<b>性质1</b>：\(I(X;Y)\leq \min\{H(X),H(Y)\}\)。直观上，两个事件共同携带的信息小于每个事件分别携带的信息。当且仅当事件\(X,Y\)之间存在函数关系（这样就可以通过\(X\)推测\(Y\)了）时，等号成立。<b>性质2</b>，共识具有对称性：\(I(X,Y)=I(Y,X)\)。
-                </p>
-                <h2>附录</h2>
-                <p>
-                    上面的所有涉及到小于等于或是大于等于的证明，都是可以通过下面两个不等式直接做差证的。证明的技巧都是去掉令人讨厌的\(\log\)。<b>证明的过程并不十分重要，真正重要的是每条性质背后的直觉。</b><br><br>
-                    <b>1. Fundamental Inequilty</b>：
-                    <p class="text-center">
-                        \(\log_D(x)\leq (x-1)\log_D(e)\)
-                    </p>
-                    <b>2. Log-Sum Inequilty</b>：
-                    <p class="text-center">
-                        \(\sum\limits_i a_i\log{\frac{a_i}{b_i}\geq (\sum\limits_i a_i)\log \frac{\sum\limits_i a_i}{\sum\limits_i b_i}}\)
-                    </p>
+                    在工程中，信息一般由01组成的二进制串编码，因此约定熵中\(\log\)的底数为2。不难看出，<b>熵永远是非负的，</b>当且仅当\(P_X(x)=1\)时\(H(X)=0\)。直观上也很好理解，当\(X\)为必然事件时，事件没有了不确定性，熵自然就是0了。第二点，<b>当\(P_X(x)\)服从均匀分布时，熵最大</b>。这一点同样很好理解，如果一个人告诉你，明天的聚会他有50%的可能来，50%的可能不来，你是最懵的；如果他说有70%的可能来，30%的可能不来，那你得到的信息是他来的可能性大一点。<br><br>
                 </p>
             </div>
         <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
