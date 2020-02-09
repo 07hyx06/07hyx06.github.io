@@ -63,7 +63,7 @@
                 <img src="raw/分割线_兔子.jpg" width="750">
                 <br><br>
                 <h2>共识</h2>
-                <b>共识，代表两个事件共有的信息量</b>，定义为：\(I(X;Y)=\sum\limits_{x,y}-p(x,y)\log\frac{p(x,y)}{p(x)p(y)}\)；写成期望形式后，共识\(I(X;Y)=\mathbb E[-\log\frac{p(X,Y)}{p(X)p(Y)}]\)。使用期望形式，可以轻松证明：
+                <b>共识，代表两个事件共有的信息量</b>，定义为：\(I(X;Y)=\sum\limits_{x,y}p(x,y)\log\frac{p(x,y)}{p(x)p(y)}\)；写成期望形式后，共识\(I(X;Y)=\mathbb E[\log\frac{p(X,Y)}{p(X)p(Y)}]\)。使用期望形式，可以轻松证明：
                 <p class="text-center">\(I(X;Y)=H(X)-H(X|Y)=H(Y)-H(Y|X)=H(X)+H(Y)-H(X,Y)\)</p>
                 下图展示了联合熵，条件熵与共识三者的关系：
                 <p class="text-center"><img src="raw/0005_1.jpg" width="400"></p>
@@ -71,7 +71,7 @@
                 <br><br>
                 我们还可以定义条件共识：
                 <p class="text-center">
-                    \(I(X;Y|Z)=\sum\limits_{x,y,z}-p(x,y,z)\log\frac{p(x,y|z)}{p(x|z)p(y|z)}=\mathbb E[-\log\frac{p(X,Y|Z)}{p(X|Z)p(Y|Z)}]\)
+                    \(I(X;Y|Z)=\sum\limits_{x,y,z}p(x,y,z)\log\frac{p(x,y|z)}{p(x|z)p(y|z)}=\mathbb E[\log\frac{p(X,Y|Z)}{p(X|Z)p(Y|Z)}]\)
                 </p>
                 不难证明所有关于共识的性质对于条件共识都是成立的，<b>因为条件熵与条件概率的本质都是替换了总的样本空间或观测空间。</b>
             </div>

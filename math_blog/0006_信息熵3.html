@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">信息熵03：熵的基本性质</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <p>
+                    上一节中，在信息熵的基础上定义了联合熵，条件熵与共识，并找到了他们的几何意义，将信息熵与文氏图相联系。<b>联合熵就是两个集合的并集，条件熵相当于集合做差，共识则是集合求交</b>。这一节在此基础上，讨论信息熵的基本性质。
+                    <img src='raw/分割线_蜡笔.jpg' width="750">
+                    <br><br>
+
+                    <h2>链式法则</h2>
+                    最基础的性质是下面一套信息熵计算的<b>链式法则</b>，将熵类比为集合后都十分好证明：
+                    <ol>
+                        <li>
+                            信息熵的链式法则：\(H(X_1,X_2,...,X_n)=\sum\limits_i H(X_i|X_1,...,X_{i-1})\)。
+                        </li>
+                        <li>
+                            条件熵的链式法则：\(H(X_1,X_2,...,X_n|Y)=\sum\limits_i H(X_i|X_1,...,X_{i-1},Y)\)。
+                        </li>
+                        <li>
+                            共识的链式法则：\(I(X_1,X_2,...,X_n;Y)=\sum\limits_i I(X_i;Y|X_1,...,X_{i-1})\)。
+                        </li>
+                        <li>
+                            条件共识的链式法则：\(I(X_1,X_2,...,X_n;Y|Z)=\sum\limits_i I(X_i;Y|X_1,...,X_{i-1},Z)\)。
+                        </li>
+                    </ol>
+                    <img src="raw/分割线_兔子.jpg" width="750">
+                    <br><br>
+
+                    <h2>共识的性质</h2>
+                    共识在信息论中具有很重要的地位，下面就来讨论一下共识的性质：
+                    <ol>
+                        <li>
+                            \(I(X;X|Y)=H(X|Y)\)，<b>说明信息熵是共识的特殊形式。</b>
+                        </li>
+                        <li>
+                            \(I(X;Y|Z)\geq 0\)，<b>在香农的信息论中，一切度量都是非负的</b>，因为信息熵是共识的特殊形式。
+                        </li>
+                        <li>
+                            \(I(X;Y)=0\)<b>当且仅当\(X,Y\)独立</b>。这是因为：
+                            <p class="text-center">\(I(X;Y)=\sum\limits_{x,y}p(x,y)\frac{p(x,y)}{p(x)p(y)}=0\sim p(x,y)=p(x)p(y)\)</p>
+                        </li>
+                        <li>
+                            \(I(X;Y,Z)\geq I(X;Y)\)，等号成立当且仅当\(X\rightarrow Y\rightarrow Z\)。这是因为：
+                            <p class="text-center">\(I(X;Y,Z)-I(X;Y)=I(X;Z|Y)\)</p>
+                            而\(I(X;Z|Y)=0\sim X\rightarrow Y\rightarrow Z\)。
+                        </li>
+                        <li>
+                            如果\(X\rightarrow Y\rightarrow Z\)，就有：\(I(X;Z)\leq I(X;Y),~I(X;Z)\leq I(Y;Z)\)。由此性质可以推出资料压缩定理：<b>马尔科夫链上，距离近的事件的共识总是大于距离远的事件。</b>
+                        </li>
+                    </ol>
+                    <img src="raw/分割线_兔子.jpg" width="750">
+                    <br><br>
+
+                    <h2>信息熵的性质</h2>
+                    信息熵还具有一下一些性质：
+                    <ol>
+                        <li>
+                            如果\(X\rightarrow Y\rightarrow Z\)，就有\(H(X|Z)\geq H(X|Y)\)。<b>在马尔可夫链上，离得近的事件共识较多。</b>
+                        </li>
+                        <li>
+                            \(H(Y|X)=0\)当且仅当\(Y\)是关于\(X\)的函数。<b>给定一个\(X\)就可以确定一个\(Y\)，说明知道了\(X\)后，\(Y\)就没有不确定性了。</b>
+                        </li>
+                    </ol>
+
+                    <img src='raw/分割线_蜡笔.jpg' width="750">
+                    <br><br>
+
+                    <h2>附录：马尔科夫链</h2>
+                    对于随机变量\(X_1,X_2,...,X_n\)，如果\(\forall i,~p(x_i|x_{i-1},...,x_1)=p(x_i|x_{i-1})\)，则称\(X_1,X_2,...,X_n\)形成一条马尔科夫链，记为:
+                    <p class="text-center">
+                        \(X_1\rightarrow X_2\rightarrow... \rightarrow X_n\)
+                    </p>
+                    马尔科夫链的逆链仍然是马尔科夫链；马尔科夫链的任意子链仍然是马尔科夫链；如果\(X\rightarrow Y\rightarrow Z\)，则在\(Y\)发生的条件下\(X,Z\)独立。
+                </p>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

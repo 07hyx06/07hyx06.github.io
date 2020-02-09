@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">KL散度与分布的距离</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                \(KL\)散度是用来衡量两个概率分布之间距离的一个<b>不对称的量，因此叫散度而不叫距离</b>。在介绍\(KL\)散度之前，需要先给出两个分布之间距离的定义。
+                <img src="raw/分割线_蜡笔.jpg" width="750">
+                <br><br>
+
+                <h2>概率分布的距离</h2>
+                概率分布\(p,q\)之间的<b>变分距离</b>定义为：
+                <p class="text-center">
+                    \(V(p,q)=\sum\limits_{x\in X} |p(x)-q(x)| \)
+                </p>
+                离散情况下，信息熵是连续的，即有：
+                <p class="text-center">
+                    \(\lim\limits_{p'\rightarrow p}H(p')=H(p)\)
+                </p>
+                另外还可以证明，概率分布列\(p_k\)在变分距离下趋近于\(p\)，等价于其在\(L2\)距离下趋近于\(p\)。
+                <img src="raw/分割线_兔子.jpg" width="750">
+                <br><br>
+
+                <h2>KL散度</h2>
+                \(KL\)散度定义为：
+                <p class="text-center">
+                    \(D(p||q)=\sum\limits_x p(x)\log\frac{p(x)}{q(x)}\)
+                </p>
+                <b>当两个分布相同时，\(KL\)散度取最小值0；如果存在\(x\)使得\(q(x)=0,p(x)!=0\)，那么\(KL\)散度变成了无穷大。</b>
+                <br><br>
+                下面的\(Pinsker\)不等式将\(KL\)散度与变分距离关联，<b>证明了\(KL\)散度是比变分距离更强的收敛条件：</b>
+                <p class="text-center">
+                    \(D(p||q)\geq \frac{1}{2\ln 2}V^2(p,q)\)
+                </p>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
