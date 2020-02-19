@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <!-- 数学公式 -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- 代码高亮 -->
+    <link href="http://cdn.bootcss.com/highlight.js/8.0/styles/monokai_sublime.min.css" rel="stylesheet">  
+    <script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>  
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">感知机损失</h1>
+            <p class="lead blog-description">应用广泛的perceptual loss</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <h2>Neural Style</h2>
+                <p>
+                    感知机损失是被\(Neural~Style\)发扬光大的。\(CVPR16\)的一篇论文能够完成下面这种神奇的效果：
+                    <p class="text-center"><img src='raw/0018_1.png' width="600"></p>
+                    假设样式图片，混合图片，内容图片分别为\(S,X,C\)，来看看它是怎么做的：随机初始化一张噪声图片作为\(X\)的初值，将\(C*H*W\)个像素值作为待训练的参数，训练它们，最后就得到了最终的混合图片。<b>能让这个设计\(work\)的损失函数就是感知机损失</b>。
+                    <br><br>
+                    感知机损失分为样式损失与内容损失。内容损失比较简单，就是将\(C,X\)同时输入一个\(VGG-16\)，在特定层输出的\(feature~map\)上面计算逐像素的\(L2\)损失。样式损失就不能这么搞了，作者采用了计算\(Gram\)矩阵损失的方法。仍然是将\(S,X\)同时输入一个\(VGG-16\)，在特定层输出了一张\(feature~map\)，维度设为\([C,H,W]\)。先将其\(view\)成\([C,HW]\)的形状，记这个矩阵为\(A\)，那么\(Gram=AA^T\)就变成了一个\([C,C]\)的矩阵。样式损失就定义为\(S,X\)分别计算得到的\(Gram\)矩阵的\(L2\)损失。<b>需要注意一点，\(VGG\)采用的是\(ImageNet\)的训练参数，并且整个\(Neural~Style\)算法的参数只有\(X\)中的那\(C*H*W\)个。</b>论文中的这幅图就是上面说的过程：
+                    <p class="text-center"><img src='raw/0018_2.png' width="750"></p>
+                </p>
+                <h2>Fast Neural Style</h2>
+                <p>
+                    \(Neural~Style\)算法确实好，<b>但他不能做到实时</b>：如果我想风格化一张自己的照片，就需要从零开始去训练混合图片。基于\(Neural~Style\)的感知机损失，\(ECCV16\)的一篇文章提出了\(Fast~Neural~Style\)算法，使得实时风格化成为了可能。
+                    <br><br>
+                    \(Fast~Neural~Style\)算法的想法也十分简单，就是去训练一个类似\(AutoEncoder\)的网络完成对任意图片的风格化。还是设样式图片，混合图片，内容图片分别为\(S,X,C\)，<b>网络的输入是\(C\)，输出是\(X\)，感知机损失就是\(C,X\)之间的内容损失与\(S,X\)之间的样式损失的加权和</b>。
+                    <p class="text-center"><img src='raw/0018_3.png' width="600"></p>
+                    这里插播一句，这种实时的算法效果是没有原始算法好的。<b>但是搭配\(Instance~Normalization\)，\(Fast~Neural~Style\)效果会更好</b>。
+                    <br><br>
+                    总结一下，\(Fast~Neural~Style\)只可以<b>实时完成任意图片向一种风格的迁移任务</b>，真正理想的情况是实时完成任意图片向任意风格迁移。
+                </p>
+                <h2>Beyond Neural Style</h2>
+                <p>
+                    \(perceptual~loss\)虽然来源于\(Neural~Style\)，但是其应用远不止于此。实际上，<b>在生成模型领域，常用的是感知机损失中的内容损失，因为它反映了图像深层次的相似度信息。</b>
+                    <ul>
+                        <li>
+                            在反向编码\(GAN\)的\(latent\)中，应用感知机损失可以重构图像的纹理，颜色特征，而只用\(MSE\)会导致图像模糊。例如\(ICCV19\)的两篇论文：Image2StyleGAN与Seeing What a GAN Cannot Generate。
+                        </li>
+                        <li>
+                            在超像素任务中被应用，例如\(SRGAN\)。也是作为\(MSE\)的补充出现的。
+                        </li>
+                        <li>
+                            \(CVPR18\)一篇论文提出了一个评估图像质量的指标：\(LPIPS\)。它的本质就是训练一个小的卷积神经网络去拟合感知机内容损失。
+                        </li>
+                    </ul>
+                </p>
+            </div>
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module">
+                <h4>友情链接</h4>
+                <ol class="list-unstyled">
+                    <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                </ol>
+                <h4>联系我</h4>
+                <p>1025723614@qq.com</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
