@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Blog</title>
+    <!-- Bootstrap core CSS -->
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap core js -->
+    <script src="../jquery-3.4.1.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <!-- 数学公式 -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- 代码高亮 -->
+    <link href="http://cdn.bootcss.com/highlight.js/8.0/styles/monokai_sublime.min.css" rel="stylesheet">  
+    <script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>  
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark">
+		<a class="navbar-brand text-light" href="../index.html">&nbsp&nbsp网站主页</a>
+	</nav>
+	<br>
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">图形管线</h1>
+            <p class="lead blog-description">GAMES101课程笔记</p>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                <h2>渲染一张图的顺序</h2>
+                <p>
+                    下面这张图很好的概括了把模型渲染到电脑屏幕上面的完整步骤。主要可以总结为3大步骤：
+                    <ol>
+                        <li>
+                            得到一个三维的模型，包括所有点的坐标（三维的点云），哪些点构成三角形（特定的三角剖分），各个三角形顶点的颜色，环境的光照。
+                        </li>
+                        <li>
+                            将三维的模型投影到二维的屏幕上面。
+                        </li>
+                        <li>
+                            光栅化，给图片上色。
+                        </li>
+                    </ol>
+                    下面将从高到低逐步阐明各个步骤的细节。
+                    <p class="text-center"><img src='raw/0006_1.png' width="600"></p>
+                </p>
+                <h2>光栅化</h2>
+                <p>
+                    为了简化问题，可以把像素想象成一个颜色均匀的小方格，一张图片就是由这些小方格堆叠而成：
+                    <p class="text-center"><img src='raw/0006_2.png' width="400"></p>
+                    假设现在得到了一些三角形，每个三角形的顶点都有颜色的信息，<b>光栅化就是给这些三角形包住的区域上色的过程。</b>光栅化又可以拆解为两步：
+                    <ol>
+                        <li>
+                            给每个单独的小三角形上色。
+                        </li>
+                        <li>
+                            处理这些小三角形的遮挡关系。
+                        </li>
+                    </ol>
+                    为了简化起见，可以不妨设三角形的顶点都是红色（如果不同色，可以通过插值得到三角形内部各个坐标的颜色）。<b>先来看第一步</b>，三角形与像素小方块的位置关系无外乎有3种：
+                    <ol>
+                        <li>
+                            像素在三角形内部。
+                        </li>
+                        <li>
+                            像素在三角形外部。
+                        </li>
+                        <li>
+                            像素在三角形边界。
+                        </li>
+                    </ol>
+                    对于第一种情况，直接将这个像素染成红色即可；对于第二种情况，不染这个像素就好了；对于第三种情况需要特别讨论，处理不好就会出现锯齿。抗锯齿的做法也很简单，<b>原理就是在边界上实现渐变色的效果。</b>具体做法就是把一个像素分为4个采样点，由三角形覆盖的采样点个数决定渐变的程度。至于如何判断点与三角形的位置关系，可以参考计算几何中的\(To~Left\)测试，这里不再赘述。
+                    <p class="text-center">
+                        <img src='raw/0006_3.png' width="350">
+                        <img src='raw/0006_4.png' width="350">
+                    </p>
+                    （上面从PPT里面截的图实际上是有BUG的，例如第二行最左边的像素点）<br><br>
+                    <b>再来看第二步，如何判断像素的位置关系。</b>原理也十分简单，使用一个叫\(Z~Buffer\)的二维数组，维护每个像素到屏幕的最近距离。\(Z~Buffer\)初始化为无穷远，每当要给一个像素确定颜色的时候，就比较这个像素的z坐标与\(Z~Buffer\)中对应的距离。如果距离更近，就染色，更新\(Z~Buffer\)；否则，说明这个像素被遮挡，就不染色。
+                    <p class="text-center"><img src='raw/0006_5.png' width="600"></p>
+                    那么如何得到一个像素到屏幕的距离？对三角形的三个顶点与像素的中心点做插值就好了。
+                </p>
+                <h2>投影</h2>
+                <p>
+                    我们知道，人眼是基于透视投影的，这就会造成近大远小的效果。想要模拟这个效果，就需要对三维模型的坐标做一些变换。变换由两步组成：
+                    <ol>
+                        <li>三维模型可以被一个空间中的立方体包住，首先需要将立方体中的三维模型改为透视投影下的坐标。</li>
+                        <li>
+                            第二步，把立方体的中心移动到原点，边长缩放成2。
+                        </li>
+                    </ol>
+                    第二步比较简单，将平移矩阵与缩放矩阵相乘即可达成目的。
+                    <p class="text-center"><img src='raw/0006_6.png' width="600"></p>
+                    第一步，转换透视投影的坐标需要一些步骤推导（懒得写了），最终得到的矩阵为：
+                    <p class="text-center">\([[n,0,0,0],[0,n,0,0],[0,0,n+f,-nf],[0,0,1,0]]\)</p>
+                </p>
+                <h2>光照</h2>
+                <p>
+                    这里提供一个简单的光照模型。考虑下面这张图的光照，分别由直射光，亮点以及墙壁的反射光构成。
+                    <p class="text-center"><img src='raw/0006_7.png' width="600"></p>
+                    对于直射光，可以把看成是球面波，因此直射光可以计算为：
+                    <p class="text-center"><img src='raw/0006_8.png' width="600"></p>
+                    对于亮点，可以认为视线与反射光线重合时会出现亮点，因此可以计算为：
+                    <p class="text-center"><img src='raw/0006_9.png' width="600"></p>
+                    对于墙壁反射的光等背景光，可以认为在整个环境里都是一个常数。最后，光照可以表示为如下公式：
+                    <p class="text-center"><img src='raw/0006_10.png' width="600"></p>
+                    通过上面的公式，我们发现只用计算出三种向量\(n,I,v\)就能够模拟光照了。其中\(I,v\)直接相减坐标便可求得，<b>对于\(n\)，依然采用插值的思路</b>，先求得三角形顶点的\(n\)，便可知三角形内任意一点的\(n\)，而三角形顶点的\(n\)又可以通过对各个面的\(n\)求平均得来，这样问题就全部解决了。
+                    <p class="text-center"><img src='raw/0006_11.png' width="300"></p>
+                </p>
+            </div>
+        
+            <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+                <div class="sidebar-module">
+                    <h4>友情链接</h4>
+                    <ol class="list-unstyled">
+                        <li><a href="https://github.com/07hyx06">我的GitHub</a></li>
+                    </ol>
+                    <h4>联系我</h4>
+                    <p>1025723614@qq.com</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
